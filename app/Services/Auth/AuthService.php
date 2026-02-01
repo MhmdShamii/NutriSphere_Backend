@@ -2,14 +2,21 @@
 
 namespace App\Services\Auth;
 
-use App\Models\Country;
 use App\Models\User;
+use App\Services\CountryService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class AuthService
 {
+    protected CountryService $countryService;
+    public function __construct(CountryService $countryService)
+    {
+        $this->countryService = $countryService;
+    }
+
+
     public function register(array $data): array
     {
         return DB::transaction(function () use ($data) {
@@ -47,7 +54,9 @@ class AuthService
     {
 
         $data['password'] = Hash::make($data['password']);
-        $data['country_id'] = $this->getCountryIdByCode($data['country_code']);
+        $data['country_id'] = $this->countryService->getCountryByCode($data['country_code'])?->id;
+        unset($data['country_code']);
+
         $user = User::create($data);
         $token = $this->issueToken($user);
 
@@ -80,11 +89,5 @@ class AuthService
         $newToken->accessToken->save();
 
         return $newToken->plainTextToken;
-    }
-
-    private function getCountryIdByCode(string $code): ?int
-    {
-        $country = Country::findByCode(strtoupper($code))->first();
-        return $country ? $country->id : null;
     }
 }

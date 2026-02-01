@@ -4,17 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class country extends Model
+class Country extends Model
 {
 
     protected $fillable = [
         'name',
         'code',
         'phone_code'
-    ];
-
-    protected $hidden = [
-        "id"
     ];
 
     public function users()
