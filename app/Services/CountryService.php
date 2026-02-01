@@ -9,17 +9,12 @@ use PhpParser\Node\Expr\BinaryOp\Equal;
 class CountryService
 {
 
-    public function getCountries(): array
-    {
-        return Country::all()->toArray();
-    }
-
     public function getCountryByCode(string $code): ?Country
     {
         return Country::findByCode($code)->first();
     }
 
-    public function getUsersForCountry(string $code)
+    public function getUsersForCountry(string $code): array
     {
         $country = $this->getCountryByCode($code);
 
@@ -32,7 +27,7 @@ class CountryService
 
     // ====== Helper Functions ======
 
-    private function getUsersByCountryId(int $countryId)
+    private function getUsersByCountryId(int $countryId): array
     {
         return User::where('country_id', $countryId)->with('country')->paginate(20);
     }

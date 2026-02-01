@@ -6,6 +6,7 @@ use App\Http\Requests\CountryUsersRequest;
 use App\Http\Resources\UserResource;
 use App\Http\Responses\ApiResponse;
 use App\Services\CountryService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 use function Laravel\Prompts\error;
@@ -21,15 +22,7 @@ class CountryController extends Controller
         $this->countryService = $countryService;
     }
 
-    public function getCountries()
-    {
-        return $this->success(
-            $this->countryService->getCountries(),
-            'Countries retrieved successfully'
-        );
-    }
-
-    public function getCountryUsers(CountryUsersRequest $request)
+    public function getCountryUsers(CountryUsersRequest $request): JsonResponse
     {
         $users = $this->countryService->getUsersForCountry($request->code);
 

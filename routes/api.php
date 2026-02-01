@@ -19,7 +19,6 @@ Route::prefix('v1')->group(function () {
             Route::post('/logout-all', [AuthController::class, 'logoutFromAllDevices']);
         });
         Route::get('/me', [UserController::class, 'me']);
-        Route::get('/countries', [CountryController::class, 'getCountries']);
         Route::get('/countries/{code}/users', [CountryController::class, 'getCountryUsers']);
     });
 });
