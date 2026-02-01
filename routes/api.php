@@ -13,7 +13,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:register');
     });
 
-    Route::middleware(['token.not_expired', 'auth:sanctum'])->group(function () {
+    Route::middleware('auth:sanctum')->group(function () {
         Route::prefix('auth')->group(function () {
             Route::post('/logout', [AuthController::class, 'logout']);
             Route::post('/logout-all', [AuthController::class, 'logoutFromAllDevices']);
