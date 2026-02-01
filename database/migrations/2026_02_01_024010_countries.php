@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('code', 3)->unique();
             $table->string('name');
+            $table->string('phone_code', 5);
             $table->timestamps();
         });
     }
