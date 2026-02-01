@@ -2,6 +2,7 @@
 
 namespace App\Services\Auth;
 
+use App\Models\Country;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -44,7 +45,9 @@ class AuthService
 
     private function createUser(array $data): array
     {
+
         $data['password'] = Hash::make($data['password']);
+        $data['country_id'] = $this->getCountryIdByCode($data['country_code']);
         $user = User::create($data);
         $token = $this->issueToken($user);
 
@@ -77,5 +80,11 @@ class AuthService
         $newToken->accessToken->save();
 
         return $newToken->plainTextToken;
+    }
+
+    private function getCountryIdByCode(string $code): ?int
+    {
+        $country = Country::findByCode(strtoupper($code))->first();
+        return $country ? $country->id : null;
     }
 }

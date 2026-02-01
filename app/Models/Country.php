@@ -17,4 +17,10 @@ class country extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    //scopes
+    public function scopeFindByCode($query, $code)
+    {
+        return $query->where('code', $code);
+    }
 }
