@@ -26,7 +26,7 @@ class User extends Authenticatable
         'last_name',
         'email',
         'phone',
-        'country',
+        'country_id',
         'password',
     ];
 
@@ -52,6 +52,14 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    // Relations
+    public function country()
+    {
+        return $this->belongsTo(Country::class);
+    }
+
+    // Query scopes
 
     public function scopeFindByEmail($query, string $email): ?User
     {
