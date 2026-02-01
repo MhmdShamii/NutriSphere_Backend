@@ -34,6 +34,6 @@ class CountryService
 
     private function getUsersByCountryId(int $countryId)
     {
-        return User::where('country_id', $countryId)->paginate(20);
+        return User::where('country_id', $countryId)->with('country')->paginate(20);
     }
 }

@@ -20,7 +20,11 @@ class UserResource extends JsonResource
             'last_name'  => $this->last_name,
             'email'      => $this->email,
             'phone'      => $this->phone,
-            'country'    => $this->country,
+            'country' => [
+                'code'       => $this->country->code,
+                'name'       => $this->country->name,
+                'phone_code' => $this->country->phone_code,
+            ],
             'image'      => $this->image,
             'varified'   => $this->email_verified_at !== null,
         ];

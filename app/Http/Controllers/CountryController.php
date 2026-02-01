@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CountryUsersRequest;
+use App\Http\Resources\UserResource;
 use App\Http\Responses\ApiResponse;
 use App\Services\CountryService;
 use Illuminate\Http\Request;
@@ -30,8 +31,10 @@ class CountryController extends Controller
 
     public function getCountryUsers(CountryUsersRequest $request)
     {
+        $users = $this->countryService->getUsersForCountry($request->code);
+
         return $this->success(
-            $this->countryService->getUsersForCountry($request->code),
+            UserResource::collection($users),
             "Successful Users For " . $request->code
         );
     }
