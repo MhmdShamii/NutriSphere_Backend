@@ -20,5 +20,6 @@ Route::prefix('v1')->group(function () {
         });
         Route::get('/me', [UserController::class, 'me']);
         Route::get('/countries', [CountryController::class, 'getCountries']);
+        Route::get('/countries/{code}/users', [CountryController::class, 'getCountryUsers']);
     });
 });
