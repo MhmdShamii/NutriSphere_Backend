@@ -6,6 +6,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class UserService
@@ -18,6 +19,10 @@ class UserService
 
     public function updateUserAvatar(User $user, ?UploadedFile $file)
     {
+        if ($user->image && $user->image !== "default.png") {
+            Storage::disk('public')->delete($user->image);
+        }
+
         $newImageName = "Avatar_" . $file->getClientOriginalName() . "_" .  Str::uuid();
 
         $path = $file->storeAs(
