@@ -30,11 +30,10 @@ class UserController extends Controller
 
     public function updateAvatar(UpdateAvatarRequest $request)
     {
-        $user = $request->user();
-        $file = $request->file('avatar');
 
-        $updatedUser = $this->userService->updateUserAvatar($user, $file);
-
-        dd($updatedUser);
+        return $this->success(
+            $this->userService->updateUserAvatar($request->user(), $request->file('avatar')),
+            "User Avatar Updated Successfuly"
+        );
     }
 }

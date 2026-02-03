@@ -30,6 +30,6 @@ class UserService
             'image' => $path,
         ]);
 
-        dd($newImageName);
+        return new UserResource($user->fresh());
     }
 }
