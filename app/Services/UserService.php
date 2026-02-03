@@ -26,6 +26,10 @@ class UserService
             'public'
         );
 
+        $user->update([
+            'image' => $path,
+        ]);
+
         dd($newImageName);
     }
 }
