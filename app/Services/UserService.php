@@ -19,29 +19,20 @@ class UserService
 
     public function updateUserAvatar(User $user, ?UploadedFile $file)
     {
-        if ($user->image && !$file) {
-            Storage::disk('public')->delete($user->image);
-            $user->update([
-                'image' => "default.png",
-            ]);
-            return $this->returnUser($user->fresh());
+
+        if (!$file) {
+            if ($user->image && $user->image !== 'default.png') {
+                Storage::disk('public')->delete($user->image);
+            }
+
+            return $this->deleteUserImage($user)->fresh();
         }
 
-        if ($user->image && $user->image !== "default.png") {
+        if ($user->image && $user->image !== 'default.png') {
             Storage::disk('public')->delete($user->image);
         }
 
-        $path = $file->storeAs(
-            'avatars',
-            $this->generateAvatarName($file),
-            'public'
-        );
-
-        $user->update([
-            'image' => $path,
-        ]);
-
-        return $this->returnUser($user->fresh());
+        return $this->updateUserImage($user, $file);
     }
 
     // ====== Helper Functions ======
@@ -57,5 +48,26 @@ class UserService
             $file->extension();
 
         return $generateName;
+    }
+
+    private function updateUserImage(User $user, UploadedFile $file): User
+    {
+        $path = $file->storeAs(
+            'avatars',
+            $this->generateAvatarName($file),
+            'public'
+        );
+        $user->update([
+            'image' => $path,
+        ]);
+        return $user->fresh();
+    }
+
+    private function deleteUserImage(User $user)
+    {
+        $user->update([
+            'image' => "default.png",
+        ]);
+        return $user->fresh();
     }
 }
