@@ -18,7 +18,10 @@ Route::prefix('v1')->group(function () {
             Route::post('/logout', [AuthController::class, 'logout']);
             Route::post('/logout-all', [AuthController::class, 'logoutFromAllDevices']);
         });
+
         Route::get('/me', [UserController::class, 'me']);
+        Route::post('/me/avatar', [UserController::class, 'updateAvatar']);
+
         Route::get('/countries/{code}/users', [CountryController::class, 'getCountryUsers']);
     });
 });
