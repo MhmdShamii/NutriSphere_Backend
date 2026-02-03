@@ -12,20 +12,20 @@ use Illuminate\Support\Str;
 class UserService
 {
 
-    public function returnUser(User $user): array
+    public function returnUser(Request $request): User
     {
-        return ['user' => new UserResource($user)];
+        return $request->user();
     }
 
-    public function updateUserAvatar(User $user, ?UploadedFile $file): array
+    public function updateUserAvatar(User $user, ?UploadedFile $file): User
     {
         if ($file === null) {
             $this->deleteUserImageFile($user);
-            return $this->returnUser($this->deleteUserImage($user));
+            return $this->deleteUserImage($user);
         }
 
         $this->deleteUserImageFile($user);
-        return $this->returnUser($this->updateUserImage($user, $file));
+        return $this->updateUserImage($user, $file);
     }
 
     // ====== Helper Functions ======

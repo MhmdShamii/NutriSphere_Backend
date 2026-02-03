@@ -24,26 +24,32 @@ class UserController extends Controller
     public function me(Request $request): JsonResponse
     {
         return $this->success(
-            $this->userService->returnUser($request->user()),
+            $this->returnUserResource($this->userService->returnUser($request)),
             'User retrieved successfully'
         );
     }
 
-    public function updateAvatar(UpdateAvatarRequest $request)
+    public function updateAvatar(UpdateAvatarRequest $request): JsonResponse
     {
 
         return $this->success(
-            $this->userService->updateUserAvatar($request->user(), $request->file('avatar')),
+            $this->returnUserResource($this->userService->updateUserAvatar($request->user(), $request->file('avatar'))),
             "User Avatar Updated Successfuly"
         );
     }
 
-    public function deleteAvatar(Request $request)
+    public function deleteAvatar(Request $request): JsonResponse
     {
 
         return $this->success(
-            $this->userService->updateUserAvatar($request->user(), null),
+            $this->returnUserResource($this->userService->updateUserAvatar($request->user(), null)),
             "User Avatar deleted Successfuly"
         );
+    }
+
+    // ====== Helper Function ======
+    private function returnUserResource(User $user)
+    {
+        return ['user' => new UserResource($user)];
     }
 }
