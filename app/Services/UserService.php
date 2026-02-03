@@ -20,6 +20,12 @@ class UserService
     {
         $newImageName = "Avatar_" . $file->getClientOriginalName() . "_" .  Str::uuid();
 
+        $path = $file->storeAs(
+            'avatars',
+            $newImageName,
+            'public'
+        );
+
         dd($newImageName);
     }
 }
