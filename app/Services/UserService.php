@@ -17,27 +17,20 @@ class UserService
         return ['user' => new UserResource($user)];
     }
 
-    public function updateUserAvatar(User $user, ?UploadedFile $file)
+    public function updateUserAvatar(User $user, ?UploadedFile $file): array
     {
-
-        if (!$file) {
-            if ($user->image && $user->image !== 'default.png') {
-                Storage::disk('public')->delete($user->image);
-            }
-
-            return $this->deleteUserImage($user)->fresh();
+        if ($file === null) {
+            $this->deleteUserImageFile($user);
+            return $this->returnUser($this->deleteUserImage($user));
         }
 
-        if ($user->image && $user->image !== 'default.png') {
-            Storage::disk('public')->delete($user->image);
-        }
-
-        return $this->updateUserImage($user, $file);
+        $this->deleteUserImageFile($user);
+        return $this->returnUser($this->updateUserImage($user, $file));
     }
 
     // ====== Helper Functions ======
 
-    private function generateAvatarName(UploadedFile $file)
+    private function generateAvatarName(UploadedFile $file): string
     {
         $generateName =
             "Avatar_" .
@@ -63,11 +56,18 @@ class UserService
         return $user->fresh();
     }
 
-    private function deleteUserImage(User $user)
+    private function deleteUserImage(User $user): User
     {
         $user->update([
             'image' => "default.png",
         ]);
         return $user->fresh();
+    }
+
+    private function deleteUserImageFile(User $user): void
+    {
+        if ($user->image && $user->image !== 'default.png') {
+            Storage::disk('public')->delete($user->image);
+        }
     }
 }

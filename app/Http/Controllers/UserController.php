@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UpdateAvatarRequest;
 use App\Http\Resources\UserResource;
 use App\Http\Responses\ApiResponse;
+use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -34,6 +35,15 @@ class UserController extends Controller
         return $this->success(
             $this->userService->updateUserAvatar($request->user(), $request->file('avatar')),
             "User Avatar Updated Successfuly"
+        );
+    }
+
+    public function deleteAvatar(Request $request)
+    {
+
+        return $this->success(
+            $this->userService->updateUserAvatar($request->user(), null),
+            "User Avatar deleted Successfuly"
         );
     }
 }
