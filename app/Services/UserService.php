@@ -23,11 +23,9 @@ class UserService
             Storage::disk('public')->delete($user->image);
         }
 
-        $newImageName = "Avatar_" . $file->getClientOriginalName() . "_" .  Str::uuid();
-
         $path = $file->storeAs(
             'avatars',
-            $newImageName,
+            $this->generateAvatarName($file),
             'public'
         );
 
@@ -36,5 +34,20 @@ class UserService
         ]);
 
         return new UserResource($user->fresh());
+    }
+
+    // ====== Helper Functions ======
+
+    private function generateAvatarName(UploadedFile $file)
+    {
+        $generateName =
+            "Avatar_" .
+            pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) .
+            "_" .
+            Str::uuid() .
+            "." .
+            $file->extension();
+
+        return $generateName;
     }
 }
