@@ -23,7 +23,7 @@ class UserController extends Controller
     public function me(Request $request): JsonResponse
     {
         return $this->success(
-            $this->userService->returnUser($request),
+            $this->userService->returnUser($request->user()),
             'User retrieved successfully'
         );
     }

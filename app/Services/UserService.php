@@ -12,13 +12,21 @@ use Illuminate\Support\Str;
 class UserService
 {
 
-    public function returnUser(Request $request): array
+    public function returnUser(User $user): array
     {
-        return ['user' => new UserResource($request->user())];
+        return ['user' => new UserResource($user)];
     }
 
     public function updateUserAvatar(User $user, ?UploadedFile $file)
     {
+        if ($user->image && !$file) {
+            Storage::disk('public')->delete($user->image);
+            $user->update([
+                'image' => "default.png",
+            ]);
+            return $this->returnUser($user->fresh());
+        }
+
         if ($user->image && $user->image !== "default.png") {
             Storage::disk('public')->delete($user->image);
         }
@@ -33,7 +41,7 @@ class UserService
             'image' => $path,
         ]);
 
-        return new UserResource($user->fresh());
+        return $this->returnUser($user->fresh());
     }
 
     // ====== Helper Functions ======
