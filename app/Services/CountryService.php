@@ -29,6 +29,6 @@ class CountryService
 
     private function getUsersByCountryId(int $countryId): LengthAwarePaginator
     {
-        return User::where('country_id', $countryId)->with('country')->paginate(1);
+        return User::where('country_id', $countryId)->with('country')->paginate(20);
     }
 }
