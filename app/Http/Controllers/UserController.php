@@ -42,7 +42,7 @@ class UserController extends Controller
     {
 
         return $this->success(
-            $this->returnUserResource($this->userService->updateUserAvatar($request->user(), null)),
+            $this->returnUserResource($this->userService->deleteUserAvatar($request->user())),
             "User Avatar deleted Successfuly"
         );
     }

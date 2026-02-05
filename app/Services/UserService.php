@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -17,15 +16,17 @@ class UserService
         return $request->user();
     }
 
-    public function updateUserAvatar(User $user, ?UploadedFile $file): User
+    public function updateUserAvatar(User $user, UploadedFile $file): User
     {
-        if ($file === null) {
-            $this->deleteUserImageFile($user);
-            return $this->deleteUserImage($user);
-        }
 
         $this->deleteUserImageFile($user);
         return $this->updateUserImage($user, $file);
+    }
+
+    public function deleteUserAvatar(User $user): User
+    {
+        $this->deleteUserImageFile($user);
+        return $this->deleteUserImage($user);
     }
 
     // ====== Helper Functions ======
