@@ -3,16 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CountryUsersRequest;
-use App\Http\Resources\UserResource;
 use App\Http\Responses\ApiResponse;
+use App\PaginationFormatter;
 use App\Services\CountryService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Pagination\LengthAwarePaginator;
 
 
 class CountryController extends Controller
 {
-    use ApiResponse;
+    use ApiResponse, PaginationFormatter;
 
 
     protected CountryService $countryService;
@@ -29,24 +28,5 @@ class CountryController extends Controller
             $this->paginationFormatter($users),
             "Successful Users For " . $request->code
         );
-    }
-
-    // ===== Helper functions =====
-
-    private function paginationFormatter(LengthAwarePaginator $data)
-    {
-        return [
-            'users'        => UserResource::collection($data),
-            'currentPage'  => $data->currentPage(),
-            'lastPage'     => $data->lastPage(),
-            'perPage'      => $data->perPage(),
-            'total'        => $data->total(),
-            'from'         => $data->firstItem(),
-            'to'           => $data->lastItem(),
-            'firstPageUrl' => $data->url(1),
-            'lastPageUrl'  => $data->url($data->lastPage()),
-            'nextPageUrl'  => $data->nextPageUrl(),
-            'prevPageUrl'  => $data->previousPageUrl(),
-        ];
     }
 }
