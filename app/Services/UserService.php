@@ -5,8 +5,11 @@ namespace App\Services;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use PHPUnit\Event\Code\Throwable;
+use RuntimeException;
 
 class UserService
 {
@@ -19,13 +22,16 @@ class UserService
     public function updateUserAvatar(User $user, UploadedFile $file): User
     {
 
-        $this->deleteUserImageFile($user);
+        if (!Storage::disk('public')->exists('avatars')) {
+            Storage::disk('public')->makeDirectory('avatars');
+        }
+
         return $this->updateUserImage($user, $file);
     }
 
     public function deleteUserAvatar(User $user): User
     {
-        $this->deleteUserImageFile($user);
+        $this->deleteUserImageFile($user->image);
         return $this->deleteUserImage($user);
     }
 
@@ -46,15 +52,27 @@ class UserService
 
     private function updateUserImage(User $user, UploadedFile $file): User
     {
-        $path = $file->storeAs(
+        $oldPath = $user->image;
+
+        $newPath = $file->storeAs(
             'avatars',
             $this->generateAvatarName($file),
             'public'
         );
-        $user->update([
-            'image' => $path,
-        ]);
-        return $user->fresh();
+
+        try {
+            DB::transaction(function () use ($user, $newPath) {
+                $user->update(['image' => $newPath]);
+            });
+
+            $this->deleteUserImageFile($oldPath);
+
+            return $user->fresh();
+        } catch (Throwable $e) {
+            $this->deleteUserImageFile($newPath);
+
+            throw new RuntimeException('Failed to update user avatar. Please try again later.');
+        }
     }
 
     private function deleteUserImage(User $user): User
@@ -65,10 +83,10 @@ class UserService
         return $user->fresh();
     }
 
-    private function deleteUserImageFile(User $user): void
+    private function deleteUserImageFile(string $imagePath): void
     {
-        if ($user->image && $user->image !== 'default.png') {
-            Storage::disk('public')->delete($user->image);
+        if ($imagePath && $imagePath !== 'default.png') {
+            Storage::disk('public')->delete($imagePath);
         }
     }
 }
