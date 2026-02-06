@@ -8,8 +8,6 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use PHPUnit\Event\Code\Throwable;
-use RuntimeException;
 
 class UserService
 {
@@ -31,8 +29,12 @@ class UserService
 
     public function deleteUserAvatar(User $user): User
     {
-        $this->deleteUserImageFile($user->image);
-        return $this->deleteUserImage($user);
+        $oldPath = $user->image;
+
+        $user = $this->deleteUserImage($user);
+        $this->deleteUserImageFile($oldPath);
+
+        return $user;
     }
 
     // ====== Helper Functions ======
@@ -41,7 +43,7 @@ class UserService
     {
         $generateName =
             "Avatar_" .
-            pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) .
+            pathinfo(str_replace(' ', '_', $file->getClientOriginalName()), PATHINFO_FILENAME) .
             "_" .
             Str::uuid() .
             "." .
@@ -68,10 +70,10 @@ class UserService
             $this->deleteUserImageFile($oldPath);
 
             return $user->fresh();
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             $this->deleteUserImageFile($newPath);
 
-            throw new RuntimeException('Failed to update user avatar. Please try again later.');
+            throw new \RuntimeException('Failed to update user avatar. Please try again later.');
         }
     }
 
@@ -83,7 +85,7 @@ class UserService
         return $user->fresh();
     }
 
-    private function deleteUserImageFile(string $imagePath): void
+    private function deleteUserImageFile(?string $imagePath): void
     {
         if ($imagePath && $imagePath !== 'default.png') {
             Storage::disk('public')->delete($imagePath);
