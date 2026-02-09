@@ -6,8 +6,7 @@ use App\Http\Requests\CountryUsersRequest;
 use App\Http\Resources\UserResource;
 use App\Http\Responses\ApiResponse;
 use App\Services\CountryService;
-use Illuminate\Http\JsonResponse;
-
+use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class CountryController extends Controller
 {
@@ -20,18 +19,10 @@ class CountryController extends Controller
         $this->countryService = $countryService;
     }
 
-    public function getCountryUsers(CountryUsersRequest $request): JsonResponse
+    public function getCountryUsers(CountryUsersRequest $request): ResourceCollection
     {
         $users = $this->countryService->getUsersForCountry($request->code);
-        $payload = UserResource::collection($users)->response()->getData(true);
 
-        return $this->success(
-            [
-                'users' => $payload['data'],
-                'links' => $payload['links'],
-                'meta' => $payload['meta']
-            ],
-            "Successful Users For " . $request->code
-        );
+        return $this->successResource(UserResource::collection($users), 'Users retrieved successfully');
     }
 }
