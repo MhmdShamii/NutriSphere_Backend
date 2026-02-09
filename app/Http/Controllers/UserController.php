@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UpdateAvatarRequest;
 use App\Http\Resources\UserResource;
 use App\Http\Responses\ApiResponse;
-use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -24,8 +23,9 @@ class UserController extends Controller
     public function me(Request $request): JsonResponse
     {
         return $this->success(
-            $this->returnUserResource($this->userService->returnUser($request)),
-            'User retrieved successfully'
+            new UserResource($this->userService->returnUser($request)),
+            'User retrieved successfully',
+            dataKey: 'user'
         );
     }
 
@@ -33,8 +33,9 @@ class UserController extends Controller
     {
 
         return $this->success(
-            $this->returnUserResource($this->userService->updateUserAvatar($request->user(), $request->file('avatar'))),
-            "User Avatar Updated Successfuly"
+            new UserResource($this->userService->updateUserAvatar($request->user(), $request->file('avatar'))),
+            'User Avatar Updated Successfuly',
+            dataKey: 'user'
         );
     }
 
@@ -42,14 +43,9 @@ class UserController extends Controller
     {
 
         return $this->success(
-            $this->returnUserResource($this->userService->deleteUserAvatar($request->user())),
-            "User Avatar deleted Successfuly"
+            new UserResource($this->userService->deleteUserAvatar($request->user())),
+            'User Avatar deleted Successfuly',
+            dataKey: 'user'
         );
-    }
-
-    // ====== Helper Function ======
-    private function returnUserResource(User $user)
-    {
-        return ['user' => new UserResource($user)];
     }
 }

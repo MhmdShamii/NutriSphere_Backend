@@ -15,7 +15,7 @@ use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class AuthController extends Controller
 {
-    use ApiResponse; // methods: success(data, message, code), error (message, code, errors)
+    use ApiResponse; // methods: success(data, message, dataKey, code), error (message, code, errors)
     protected AuthService $authService;
 
     public function __construct(AuthService $authService)
@@ -31,7 +31,7 @@ class AuthController extends Controller
         return $this->success(
             $this->authResponseData($result['user'], $result['token']),
             'User registered successfully',
-            201
+            status: 201
         );
     }
 
@@ -43,7 +43,7 @@ class AuthController extends Controller
             return $this->success(
                 $this->authResponseData($result['user'], $result['token']),
                 'User logged in successfully',
-                200
+                status: 200
             );
         } catch (UnauthorizedHttpException $e) {
             return $this->error($e->getMessage(), 401);
@@ -54,14 +54,14 @@ class AuthController extends Controller
     {
         $this->authService->logout($request->user());
 
-        return $this->success(null, 'Logged out successfully', 200);
+        return $this->success(message: 'Logged out successfully');
     }
 
     public function logoutFromAllDevices(Request $request): JsonResponse
     {
         $this->authService->logoutFromAllDevices($request->user());
 
-        return $this->success(null, 'Logged out from all devices successfully', 200);
+        return $this->success(message: 'Logged out from all devices successfully');
     }
 
     //======== Helper Functions =========//

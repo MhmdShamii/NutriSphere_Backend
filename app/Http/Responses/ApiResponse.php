@@ -7,10 +7,10 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
 
 trait ApiResponse
 {
-    protected function success(mixed $data = null, string $message = 'OK', int $status = 200): JsonResponse
+    protected function success(mixed $data = null, string $message = 'OK', string $dataKey = 'data', int $status = 200): JsonResponse
     {
         return response()->json([
-            'data' => $data,
+            $dataKey => $data,
             'message' => $message,
         ], $status);
     }
