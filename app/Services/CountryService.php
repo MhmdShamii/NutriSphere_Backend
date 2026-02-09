@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\Country;
 use App\Models\User;
-use PhpParser\Node\Expr\BinaryOp\Equal;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class CountryService
 {
@@ -14,7 +14,7 @@ class CountryService
         return Country::findByCode($code)->first();
     }
 
-    public function getUsersForCountry(string $code): array
+    public function getUsersForCountry(string $code): LengthAwarePaginator
     {
         $country = $this->getCountryByCode($code);
 
@@ -27,7 +27,7 @@ class CountryService
 
     // ====== Helper Functions ======
 
-    private function getUsersByCountryId(int $countryId): array
+    private function getUsersByCountryId(int $countryId): LengthAwarePaginator
     {
         return User::where('country_id', $countryId)->with('country')->paginate(20);
     }

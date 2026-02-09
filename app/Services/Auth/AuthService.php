@@ -58,6 +58,7 @@ class AuthService
         unset($data['country_code']);
 
         $user = User::create($data);
+        $user["image"] = "default.png";
         $token = $this->issueToken($user);
 
         return [

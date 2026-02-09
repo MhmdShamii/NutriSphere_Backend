@@ -18,7 +18,13 @@ Route::prefix('v1')->group(function () {
             Route::post('/logout', [AuthController::class, 'logout']);
             Route::post('/logout-all', [AuthController::class, 'logoutFromAllDevices']);
         });
-        Route::get('/me', [UserController::class, 'me']);
+
+        Route::prefix('me')->group(function () {
+            Route::get('/', [UserController::class, 'me']);
+            Route::post('/avatar', [UserController::class, 'updateAvatar']);
+            Route::delete('/avatar', [UserController::class, 'deleteAvatar']);
+        });
+
         Route::get('/countries/{code}/users', [CountryController::class, 'getCountryUsers']);
     });
 });

@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UpdateAvatarRequest;
 use App\Http\Resources\UserResource;
 use App\Http\Responses\ApiResponse;
+use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -11,8 +13,39 @@ class UserController extends Controller
 {
     use ApiResponse;
 
+    protected UserService $userService;
+
+    public function __construct(UserService $userService)
+    {
+        $this->userService = $userService;
+    }
+
     public function me(Request $request): JsonResponse
     {
-        return $this->success(['user' => new UserResource($request->user())], 'User retrieved successfully');
+        return $this->success(
+            new UserResource($this->userService->returnUser($request)),
+            'User retrieved successfully',
+            dataKey: 'user'
+        );
+    }
+
+    public function updateAvatar(UpdateAvatarRequest $request): JsonResponse
+    {
+
+        return $this->success(
+            new UserResource($this->userService->updateUserAvatar($request->user(), $request->file('avatar'))),
+            'User Avatar Updated Successfuly',
+            dataKey: 'user'
+        );
+    }
+
+    public function deleteAvatar(Request $request): JsonResponse
+    {
+
+        return $this->success(
+            new UserResource($this->userService->deleteUserAvatar($request->user())),
+            'User Avatar deleted Successfuly',
+            dataKey: 'user'
+        );
     }
 }
