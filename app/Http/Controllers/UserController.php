@@ -20,6 +20,21 @@ class UserController extends Controller
         $this->userService = $userService;
     }
 
+    public function checkEmailExistence(Request $request): JsonResponse
+    {
+        $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        $result = $this->userService->findUserEmailExist($request->input('email'));
+
+        return $this->success(
+            $result,
+            $result ? 'Email already exists' : 'Email is available',
+            dataKey: 'existing_user'
+        );
+    }
+
     public function me(Request $request): JsonResponse
     {
         return $this->success(

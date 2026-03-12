@@ -17,6 +17,11 @@ class UserService
         return $request->user();
     }
 
+    public function findUserEmailExist(string $email): bool
+    {
+        return User::where('email', $email)->first() ? true : false;
+    }
+
     public function updateUserAvatar(User $user, UploadedFile $file): User
     {
 
