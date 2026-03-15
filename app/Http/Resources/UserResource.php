@@ -28,7 +28,7 @@ class UserResource extends JsonResource
             ],
             'image' => [
                 'avatar' => $this->image === 'default.png'
-                    ? asset('images/default.png')
+                    ? asset('storage/avatars/default.png')
                     : Storage::disk('public')->url($this->image),
             ],
             'verified'   => $this->email_verified_at !== null,
