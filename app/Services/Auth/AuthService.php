@@ -45,7 +45,7 @@ class AuthService
 
     public function logoutFromAllDevices(User $user): void
     {
-        $user->tokens()->where('id', '!=', $user->currentAccessToken()->id)->delete();
+        $user->tokens()->delete();
     }
 
     //======== Helper Functions =========//
