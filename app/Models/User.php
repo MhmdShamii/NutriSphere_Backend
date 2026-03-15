@@ -58,8 +58,8 @@ class User extends Authenticatable
 
     // Query scopes
 
-    public function scopeFindByEmail($query, string $email): ?User
+    public function scopeFindByEmail($query, string $email)
     {
-        return $query->where('email', $email)->first();
+        return $query->where('email', $email);
     }
 }
