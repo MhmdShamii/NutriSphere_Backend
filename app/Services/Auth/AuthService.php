@@ -57,11 +57,10 @@ class AuthService
 
         $user = User::create($data);
         $user["image"] = "default.png";
-        $token = $this->issueToken($user);
 
         return [
             'user' => $user,
-            'token' => $token,
+            'token' => null,
         ];
     }
 

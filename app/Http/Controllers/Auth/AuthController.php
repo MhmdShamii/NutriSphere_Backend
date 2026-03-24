@@ -29,7 +29,7 @@ class AuthController extends Controller
         $result = $this->authService->register($data);
 
         return $this->success(
-            $this->authResponseData($result['user'], $result['token']),
+            ['user' => $result['user']],
             'User registered successfully',
             status: 201
         );
