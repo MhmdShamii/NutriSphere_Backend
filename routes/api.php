@@ -26,6 +26,7 @@ Route::prefix('v1')->group(function () {
             Route::delete('/avatar', [UserController::class, 'deleteAvatar']);
         });
 
-        Route::get('/countries/{code}/users', [CountryController::class, 'getCountryUsers']);
+        // for later
+        // Route::get('/countries/{code}/users', [CountryController::class, 'getCountryUsers']);
     });
 });
