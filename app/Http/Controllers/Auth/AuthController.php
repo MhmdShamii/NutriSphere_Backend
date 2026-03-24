@@ -9,6 +9,7 @@ use App\Http\Resources\UserResource;
 use App\Http\Responses\ApiResponse;
 use App\Services\Auth\AuthService;
 use App\Models\User;
+use GrahamCampbell\ResultType\Success;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
@@ -42,6 +43,14 @@ class AuthController extends Controller
         return redirect()->to(
             config('app.frontend_url') . '/auth/verify-success?token=' . $result['token']
         );
+    }
+    public function resendVerification(Request $request)
+    {
+        $result = $this->authService->resendVerificationEmail($request->user());
+
+        return $result['code'] == 200 ?
+            $this->success(null, "Verification email sent", status: $result['code']) :
+            $this->success(null, "Email already verified", status: $result['code']);
     }
 
     public function login(LoginRequest $loginRequest): JsonResponse

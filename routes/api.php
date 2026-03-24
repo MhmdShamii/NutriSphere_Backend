@@ -15,6 +15,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
             ->middleware(['signed'])
             ->name('verification.verify');
+        Route::post('/email/resend', [AuthController::class, 'resendVerification']);
     });
 
     Route::middleware('auth:sanctum')->group(function () {

@@ -47,6 +47,20 @@ class AuthService
         ];
     }
 
+    public function resendVerificationEmail(User $user)
+    {
+        if ($user->hasVerifiedEmail()) {
+            return [
+                "code" => 400
+            ];
+        }
+
+        $user->sendEmailVerificationNotification();
+
+        return [
+            "code" => 200
+        ];
+    }
 
     public function login(array $data): array
     {
