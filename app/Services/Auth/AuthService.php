@@ -2,12 +2,14 @@
 
 namespace App\Services\Auth;
 
+use App\Jobs\SendVerificationEmailJob;
 use App\Models\User;
 use App\Services\CountryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
+use Illuminate\Auth\Notifications\VerifyEmail;
 
 class AuthService
 {
@@ -95,7 +97,7 @@ class AuthService
 
         $user = User::create($data);
 
-        $user->sendEmailVerificationNotification();
+        SendVerificationEmailJob::dispatch($user);
 
         return [
             'user' => $user,

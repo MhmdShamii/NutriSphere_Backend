@@ -12,9 +12,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
         Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:register');
         Route::post('/check-email', [UserController::class, 'checkEmailExistence']);
-        Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
-            ->middleware(['signed'])
-            ->name('verification.verify');
+        Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])->middleware(['signed'])->name('verification.verify');
         Route::post('/email/resend', [AuthController::class, 'resendVerification']);
     });
 
