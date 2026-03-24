@@ -35,6 +35,15 @@ class AuthController extends Controller
         );
     }
 
+    public function verifyEmail(Request $request)
+    {
+        $result = $this->authService->verifyEmail($request);
+
+        return redirect()->to(
+            config('app.frontend_url') . '/auth/verify-success?token=' . $result['token']
+        );
+    }
+
     public function login(LoginRequest $loginRequest): JsonResponse
     {
         try {
