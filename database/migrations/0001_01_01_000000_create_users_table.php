@@ -18,8 +18,8 @@ return new class extends Migration
             $table->string("last_name")->nullable();
             $table->string('email')->unique();
             $table->string("role")->default("client");
-            $table->boolean("profile_finished");
-            $table->foreignId('country_id')->constrained('countries')->restrictOnDelete()->nullable();
+            $table->boolean("profile_finished")->default(false);
+            $table->foreignId('country_id')->nullable()->constrained('countries')->restrictOnDelete();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();

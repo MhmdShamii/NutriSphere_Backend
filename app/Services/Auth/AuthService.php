@@ -54,8 +54,6 @@ class AuthService
     {
 
         $data['password'] = Hash::make($data['password']);
-        $data['country_id'] = $this->countryService->getCountryByCode($data['country_code'])?->id;
-        unset($data['country_code']);
 
         $user = User::create($data);
         $user["image"] = "default.png";

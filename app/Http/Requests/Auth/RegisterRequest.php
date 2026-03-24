@@ -22,21 +22,8 @@ class RegisterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "first_name" => ["required", "string", "max:255"],
-            "last_name" => ["required", "string", "max:255"],
             "email" => ["required", "string", "email", "max:255", "unique:users,email"],
-            "phone" => ["required", "string", "max:20"],
-            "country_code" => ["required", "string", "size:3", "exists:countries,code"],
             "password" => ["required", "string", "min:8", "confirmed"],
         ];
-    }
-
-    protected function prepareForValidation(): void
-    {
-        if ($this->has('country_code')) {
-            $this->merge([
-                'country_code' => strtoupper($this->country_code),
-            ]);
-        }
     }
 }
