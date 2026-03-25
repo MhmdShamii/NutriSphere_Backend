@@ -5,11 +5,9 @@ namespace App\Services\Auth;
 use App\Jobs\SendVerificationEmailJob;
 use App\Models\User;
 use App\Services\CountryService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
-use Illuminate\Auth\Notifications\VerifyEmail;
 
 class AuthService
 {
@@ -27,12 +25,12 @@ class AuthService
         });
     }
 
-    public function verifyEmail(Request $request)
+    public function verifyEmail(int $id, string $hash)
     {
 
-        $user = User::findOrFail($request->route('id'));
+        $user = User::findOrFail($id);
 
-        if (! hash_equals((string) $request->route('hash'), sha1($user->email))) {
+        if (! hash_equals((string) $hash, sha1($user->email))) {
             throw new \Exception('Invalid verification link');
         }
 

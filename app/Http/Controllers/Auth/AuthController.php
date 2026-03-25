@@ -37,7 +37,7 @@ class AuthController extends Controller
 
     public function verifyEmail(Request $request)
     {
-        $result = $this->authService->verifyEmail($request);
+        $result = $this->authService->verifyEmail($request->route('id'), $request->route('hash'));
 
         return redirect()->to(
             config('app.frontend_url') . '/auth/verify-success?token=' . $result['token']
