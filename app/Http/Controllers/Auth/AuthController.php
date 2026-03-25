@@ -35,6 +35,23 @@ class AuthController extends Controller
         );
     }
 
+    public function verifyEmail(Request $request)
+    {
+        $result = $this->authService->verifyEmail($request->route('id'), $request->route('hash'));
+
+        return redirect()->to(
+            config('app.frontend_url') . '/auth/verify-success?token=' . $result['token']
+        );
+    }
+    public function resendVerification(Request $request)
+    {
+        $result = $this->authService->resendVerificationEmail($request->user());
+
+        return $result['code'] == 200 ?
+            $this->success(null, "Verification email sent", status: $result['code']) :
+            $this->success(null, "Email already verified", status: $result['code']);
+    }
+
     public function login(LoginRequest $loginRequest): JsonResponse
     {
         try {
