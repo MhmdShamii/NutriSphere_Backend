@@ -2,6 +2,7 @@
 
 namespace App\Services\Auth;
 
+use App\Jobs\SendVerificationEmailJob;
 use App\Models\User;
 use App\Services\CountryService;
 use Illuminate\Support\Facades\DB;
@@ -22,6 +23,43 @@ class AuthService
         return DB::transaction(function () use ($data) {
             return $this->createUser($data);
         });
+    }
+
+    public function verifyEmail(int $id, string $hash)
+    {
+
+        $user = User::findOrFail($id);
+
+        if (! hash_equals((string) $hash, sha1($user->email))) {
+            throw new \Exception('Invalid verification link');
+        }
+
+        if (! $user->hasVerifiedEmail()) {
+            $user->email_verified_at = now();
+            $user->save();
+        }
+
+        $token = $this->issueToken($user);
+
+        return [
+            'user' => $user,
+            'token' => $token,
+        ];
+    }
+
+    public function resendVerificationEmail(User $user)
+    {
+        if ($user->hasVerifiedEmail()) {
+            return [
+                "code" => 400
+            ];
+        }
+
+        $user->sendEmailVerificationNotification();
+
+        return [
+            "code" => 200
+        ];
     }
 
     public function login(array $data): array
@@ -54,16 +92,14 @@ class AuthService
     {
 
         $data['password'] = Hash::make($data['password']);
-        $data['country_id'] = $this->countryService->getCountryByCode($data['country_code'])?->id;
-        unset($data['country_code']);
 
         $user = User::create($data);
-        $user["image"] = "default.png";
-        $token = $this->issueToken($user);
+
+        SendVerificationEmailJob::dispatch($user);
 
         return [
             'user' => $user,
-            'token' => $token,
+            'token' => null,
         ];
     }
 

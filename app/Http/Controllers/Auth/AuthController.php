@@ -29,10 +29,27 @@ class AuthController extends Controller
         $result = $this->authService->register($data);
 
         return $this->success(
-            $this->authResponseData($result['user'], $result['token']),
+            ['user' => $result['user']],
             'User registered successfully',
             status: 201
         );
+    }
+
+    public function verifyEmail(Request $request)
+    {
+        $result = $this->authService->verifyEmail($request->route('id'), $request->route('hash'));
+
+        return redirect()->to(
+            config('app.frontend_url') . '/auth/verify-success?token=' . $result['token']
+        );
+    }
+    public function resendVerification(Request $request)
+    {
+        $result = $this->authService->resendVerificationEmail($request->user());
+
+        return $result['code'] == 200 ?
+            $this->success(null, "Verification email sent", status: $result['code']) :
+            $this->success(null, "Email already verified", status: $result['code']);
     }
 
     public function login(LoginRequest $loginRequest): JsonResponse

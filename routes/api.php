@@ -12,6 +12,8 @@ Route::prefix('v1')->group(function () {
         Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
         Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:register');
         Route::post('/check-email', [UserController::class, 'checkEmailExistence']);
+        Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])->middleware(['signed'])->name('verification.verify');
+        Route::post('/email/resend', [AuthController::class, 'resendVerification']);
     });
 
     Route::middleware('auth:sanctum')->group(function () {
@@ -26,6 +28,7 @@ Route::prefix('v1')->group(function () {
             Route::delete('/avatar', [UserController::class, 'deleteAvatar']);
         });
 
-        Route::get('/countries/{code}/users', [CountryController::class, 'getCountryUsers']);
+        // for later
+        // Route::get('/countries/{code}/users', [CountryController::class, 'getCountryUsers']);
     });
 });
