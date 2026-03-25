@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\UserProvider;
+use App\Enums\UserRole;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -18,9 +20,9 @@ return new class extends Migration
             $table->string('first_name')->nullable();
             $table->string("last_name")->nullable();
             $table->string('email')->unique();
-            $table->string('provider')->default('local');
+            $table->string('provider')->default(UserProvider::LOCAL->value);
             $table->string("provider_id")->nullable();
-            $table->string('role')->default('client');
+            $table->string('role')->default(UserRole::CLIENT->value);
             $table->boolean("profile_finished")->default(false);
             $table->foreignId('country_id')->nullable()->constrained('countries')->restrictOnDelete();
             $table->timestamp('email_verified_at')->nullable();
