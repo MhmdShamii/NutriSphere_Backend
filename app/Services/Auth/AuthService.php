@@ -2,6 +2,7 @@
 
 namespace App\Services\Auth;
 
+use App\Builders\UserBuilder;
 use App\Jobs\SendVerificationEmailJob;
 use App\Models\User;
 use App\Services\CountryService;
@@ -93,7 +94,10 @@ class AuthService
 
         $data['password'] = Hash::make($data['password']);
 
-        $user = User::create($data);
+        $user = UserBuilder::make()
+            ->email($data['email'])
+            ->password($data["password"])
+            ->create();
 
         SendVerificationEmailJob::dispatch($user);
 
