@@ -22,7 +22,20 @@ class AuthService
     public function register(array $data): array
     {
         return DB::transaction(function () use ($data) {
-            return $this->createUser($data);
+
+            $data['password'] = Hash::make($data['password']);
+
+            $user = UserBuilder::make()
+                ->email($data['email'])
+                ->password($data["password"])
+                ->create();
+
+            SendVerificationEmailJob::dispatch($user);
+
+            return [
+                'user' => $user,
+                'token' => null,
+            ];
         });
     }
 
@@ -88,24 +101,6 @@ class AuthService
     }
 
     //======== Helper Functions =========//
-
-    private function createUser(array $data): array
-    {
-
-        $data['password'] = Hash::make($data['password']);
-
-        $user = UserBuilder::make()
-            ->email($data['email'])
-            ->password($data["password"])
-            ->create();
-
-        SendVerificationEmailJob::dispatch($user);
-
-        return [
-            'user' => $user,
-            'token' => null,
-        ];
-    }
 
     private function authenticateUser(array $data): User
     {
