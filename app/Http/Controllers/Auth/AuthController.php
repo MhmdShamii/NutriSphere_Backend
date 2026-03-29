@@ -39,17 +39,23 @@ class AuthController extends Controller
     {
         $result = $this->authService->verifyEmail($request->route('id'), $request->route('hash'));
 
+        if (isset($result['status']) && $result['status'] == 404) {
+            return redirect()->to(
+                config('app.frontend_url') . '/not-found?message=' . urlencode($result['message'])
+            );
+        }
+
         return redirect()->to(
             config('app.frontend_url') . '/auth/verify-success?token=' . $result['token']
         );
     }
     public function resendVerification(Request $request)
     {
-        $result = $this->authService->resendVerificationEmail($request->user());
+        $result = $this->authService->resendVerificationEmail($request["email"]);
 
-        return $result['code'] == 200 ?
-            $this->success(null, "Verification email sent", status: $result['code']) :
-            $this->success(null, "Email already verified", status: $result['code']);
+        return $result['status'] == 200 ?
+            $this->success(null, "Verification email sent", status: $result['status']) :
+            $this->success(null, "Email already verified", status: $result['status']);
     }
 
     public function login(LoginRequest $loginRequest): JsonResponse

@@ -44,6 +44,13 @@ class AuthService
 
         $user = User::findOrFail($id);
 
+        if ($user->hasVerifiedEmail()) {
+            return [
+                'message' => 'Email already verified',
+                "status" => 404,
+            ];
+        }
+
         if (! hash_equals((string) $hash, sha1($user->email))) {
             throw new \Exception('Invalid verification link');
         }
@@ -61,18 +68,22 @@ class AuthService
         ];
     }
 
-    public function resendVerificationEmail(User $user)
+    public function resendVerificationEmail(string $email): array
     {
+        $user = User::findByEmail($email)->first();
+
         if ($user->hasVerifiedEmail()) {
             return [
-                "code" => 400
+                "status" => 404,
+                "message" => "Email already verified",
             ];
         }
 
         $user->sendEmailVerificationNotification();
 
         return [
-            "code" => 200
+            "status" => 200,
+            "message" => "Verification email sent",
         ];
     }
 
