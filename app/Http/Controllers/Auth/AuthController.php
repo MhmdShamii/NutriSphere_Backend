@@ -49,6 +49,7 @@ class AuthController extends Controller
             config('app.frontend_url') . '/auth/verify-success?token=' . $result['token']
         );
     }
+
     public function resendVerification(Request $request)
     {
         $result = $this->authService->resendVerificationEmail($request["email"]);
@@ -62,6 +63,21 @@ class AuthController extends Controller
     {
         try {
             $result = $this->authService->login($loginRequest->validated());
+
+            return $this->success(
+                $this->authResponseData($result['user'], $result['token']),
+                'User logged in successfully',
+                status: 200
+            );
+        } catch (UnauthorizedHttpException $e) {
+            return $this->error($e->getMessage(), 401);
+        }
+    }
+
+    public function googleLogin(Request $request): JsonResponse
+    {
+        try {
+            $result = $this->authService->googleLogin($request['id_token']);
 
             return $this->success(
                 $this->authResponseData($result['user'], $result['token']),

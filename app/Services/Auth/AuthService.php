@@ -6,6 +6,7 @@ use App\Builders\UserBuilder;
 use App\Jobs\SendVerificationEmailJob;
 use App\Models\User;
 use App\Services\CountryService;
+use Google_Client;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
@@ -101,6 +102,14 @@ class AuthService
         });
     }
 
+    public function googleLogin(string $idToken)
+    {
+        return DB::transaction(function () use ($idToken) {
+
+            $payload = $this->verifyGoogleToken($idToken);
+        });
+    }
+
     public function logout(User $user): void
     {
         $user->currentAccessToken()?->delete();
@@ -112,6 +121,22 @@ class AuthService
     }
 
     //======== Helper Functions =========//
+
+    private function verifyGoogleToken(string $idToken): array
+    {
+        $client = new Google_Client();
+        $client->setClientId(config('services.google.client_id'));
+
+        $payload = $client->verifyIdToken($idToken);
+
+        dd($payload);
+
+        if (!$payload) {
+            throw new UnauthorizedHttpException('', 'Invalid Google token');
+        }
+
+        return $payload;
+    }
 
     private function authenticateUser(array $data): User
     {
