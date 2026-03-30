@@ -77,6 +77,11 @@ class AuthController extends Controller
     public function googleLogin(Request $request): JsonResponse
     {
         try {
+
+            $request->validate([
+                "id_token" => "required|string",
+            ]);
+
             $result = $this->authService->googleLogin($request['id_token']);
 
             return $this->success(

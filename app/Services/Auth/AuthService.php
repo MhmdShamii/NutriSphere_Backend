@@ -3,6 +3,7 @@
 namespace App\Services\Auth;
 
 use App\Builders\UserBuilder;
+use App\Enums\UserProvider;
 use App\Jobs\SendVerificationEmailJob;
 use App\Models\User;
 use App\Services\CountryService;
@@ -14,11 +15,11 @@ use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 class AuthService
 {
     protected CountryService $countryService;
+
     public function __construct(CountryService $countryService)
     {
         $this->countryService = $countryService;
     }
-
 
     public function register(array $data): array
     {
@@ -107,6 +108,59 @@ class AuthService
         return DB::transaction(function () use ($idToken) {
 
             $payload = $this->verifyGoogleToken($idToken);
+
+            [
+                'sub' => $googleId,
+                'email' => $email,
+                'email_verified' => $emailVerified,
+                'given_name' => $firstName,
+                'family_name' => $lastName,
+                'picture' => $picture,
+            ] = $payload;
+
+            $user = User::where("provider_id", $googleId)->first();
+
+            if ($user) {
+                $token = $this->issueToken($user, 10, "google");
+                return [
+                    'user' => $user,
+                    'token' => $token,
+                ];
+            }
+
+            $user = User::findByEmail($email)->first();
+
+            if ($user) {
+                $user->provider = UserProvider::GOOGLE->value;
+                $user->provider_id = $googleId;
+                if (!$user->hasVerifiedEmail()) {
+                    $user->email_verified_at = now();
+                }
+                if ($user->image == "default.png") {
+                    $user->image = $picture;
+                }
+                $user->save();
+                $token = $this->issueToken($user, 10, "google");
+                return [
+                    'user' => $user,
+                    'token' => $token,
+                ];
+            }
+
+            $user = UserBuilder::make()
+                ->email($email)
+                ->firstName($firstName)
+                ->lastName($lastName)
+                ->google($googleId)
+                ->avatar($picture)
+                ->verified()
+                ->create();
+            $token = $this->issueToken($user, 10, "google");
+
+            return [
+                'user' => $user,
+                'token' => $token,
+            ];
         });
     }
 
@@ -128,8 +182,6 @@ class AuthService
         $client->setClientId(config('services.google.client_id'));
 
         $payload = $client->verifyIdToken($idToken);
-
-        dd($payload);
 
         if (!$payload) {
             throw new UnauthorizedHttpException('', 'Invalid Google token');

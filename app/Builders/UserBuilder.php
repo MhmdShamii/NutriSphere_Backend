@@ -14,6 +14,12 @@ class UserBuilder
         return new self();
     }
 
+    public function avatar(string $avatarUrl): self
+    {
+        $this->data['image'] = $avatarUrl;
+        return $this;
+    }
+
     public function email(string $email): self
     {
         $this->data['email'] = $email;
@@ -36,6 +42,18 @@ class UserBuilder
     public function local(): self
     {
         $this->data['provider'] = UserProvider::LOCAL;
+        return $this;
+    }
+
+    public function firstName(string $firstName): self
+    {
+        $this->data['first_name'] = $firstName;
+        return $this;
+    }
+
+    public function lastName(string $lastName): self
+    {
+        $this->data['last_name'] = $lastName;
         return $this;
     }
 
