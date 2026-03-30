@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\ResendVerificationRequest;
 use App\Http\Resources\UserResource;
 use App\Http\Responses\ApiResponse;
 use App\Services\Auth\AuthService;
@@ -39,7 +40,7 @@ class AuthController extends Controller
     {
         $result = $this->authService->verifyEmail($request->route('id'), $request->route('hash'));
 
-        if (isset($result['status']) && $result['status'] == 404) {
+        if (isset($result['status']) && $result['status'] === 404) {
             return redirect()->to(
                 config('app.frontend_url') . '/not-found?message=' . urlencode($result['message'])
             );
@@ -50,9 +51,9 @@ class AuthController extends Controller
         );
     }
 
-    public function resendVerification(Request $request)
+    public function resendVerification(ResendVerificationRequest $request)
     {
-        $result = $this->authService->resendVerificationEmail($request["email"]);
+        $result = $this->authService->resendVerificationEmail($request->validated()['email']);
 
         return $result['status'] == 200 ?
             $this->success(null, "Verification email sent", status: $result['status']) :

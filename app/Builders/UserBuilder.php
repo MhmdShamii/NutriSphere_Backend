@@ -4,6 +4,7 @@ namespace App\Builders;
 
 use App\Models\User;
 use App\Enums\UserProvider;
+use Illuminate\Support\Facades\Hash;
 
 class UserBuilder
 {
@@ -26,9 +27,9 @@ class UserBuilder
         return $this;
     }
 
-    public function password(?string $password): self
+    public function password(string $password): self
     {
-        $this->data['password'] = $password;
+        $this->data['password'] = Hash::make($password);
         return $this;
     }
 

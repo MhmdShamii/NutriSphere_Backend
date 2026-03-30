@@ -6,7 +6,6 @@ use App\Builders\UserBuilder;
 use App\Enums\UserProvider;
 use App\Jobs\SendVerificationEmailJob;
 use App\Models\User;
-use App\Services\CountryService;
 use Google_Client;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -14,18 +13,9 @@ use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class AuthService
 {
-    protected CountryService $countryService;
-
-    public function __construct(CountryService $countryService)
-    {
-        $this->countryService = $countryService;
-    }
-
     public function register(array $data): array
     {
         return DB::transaction(function () use ($data) {
-
-            $data['password'] = Hash::make($data['password']);
 
             $user = UserBuilder::make()
                 ->email($data['email'])
@@ -57,10 +47,8 @@ class AuthService
             throw new \Exception('Invalid verification link');
         }
 
-        if (! $user->hasVerifiedEmail()) {
-            $user->email_verified_at = now();
-            $user->save();
-        }
+        $user->email_verified_at = now();
+        $user->save();
 
         $token = $this->issueToken($user);
 
@@ -73,6 +61,10 @@ class AuthService
     public function resendVerificationEmail(string $email): array
     {
         $user = User::findByEmail($email)->first();
+
+        if (!$user) {
+            throw new \Exception('User not found');
+        }
 
         if ($user->hasVerifiedEmail()) {
             return [
@@ -188,12 +180,12 @@ class AuthService
             'picture' => $picture,
         ] = $payload;
 
-        $user->provider = UserProvider::GOOGLE->value;
+        $user->provider = UserProvider::GOOGLE;
         $user->provider_id = $googleId;
         if (!$user->hasVerifiedEmail()) {
             $user->email_verified_at = now();
         }
-        if ($user->image == "default.png") {
+        if ($user->image === null || $user->image === 'default.png') {
             $user->image = $picture;
         }
         if (is_null($user->first_name)) {

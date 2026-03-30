@@ -28,7 +28,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'provider_id',
         'email',
         'role',
-        'verified',
         'profile_finished',
         'country_id',
         'password',
@@ -46,22 +45,10 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     protected $casts = [
-        'provider' => UserProvider::class,
-        'role' => UserRole::class,
+        'provider'         => UserProvider::class,
+        'role'             => UserRole::class,
+        'email_verified_at' => 'datetime',
     ];
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
 
     // Relations
     public function country()
