@@ -222,12 +222,17 @@ class AuthService
     private function authenticateUser(array $data): User
     {
         $user = User::findByEmail($data['email'])->first();
+
+        if ($user->provider !== UserProvider::LOCAL && ! $user->password) {
+            throw new UnauthorizedHttpException('', 'Please login with ' . $user->provider->value);
+        }
         if (!$this->isValidUser($user, $data['password'])) {
             throw new UnauthorizedHttpException('', 'Invalid credentials');
         }
         if (! $user->hasVerifiedEmail()) {
             throw new UnauthorizedHttpException('', 'Email not verified');
         }
+
         return $user;
     }
 
