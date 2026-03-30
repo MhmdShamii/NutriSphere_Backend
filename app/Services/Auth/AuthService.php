@@ -182,7 +182,9 @@ class AuthService
 
         $user->provider = UserProvider::GOOGLE;
         $user->provider_id = $googleId;
+
         if (!$user->hasVerifiedEmail()) {
+            $user->password = null;
             $user->email_verified_at = now();
         }
         if ($user->image === null || $user->image === 'default.png') {
