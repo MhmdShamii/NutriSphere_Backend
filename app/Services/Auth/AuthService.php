@@ -2,26 +2,32 @@
 
 namespace App\Services\Auth;
 
+use App\Builders\UserBuilder;
+use App\Enums\UserProvider;
 use App\Jobs\SendVerificationEmailJob;
 use App\Models\User;
-use App\Services\CountryService;
+use Google_Client;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class AuthService
 {
-    protected CountryService $countryService;
-    public function __construct(CountryService $countryService)
-    {
-        $this->countryService = $countryService;
-    }
-
-
     public function register(array $data): array
     {
         return DB::transaction(function () use ($data) {
-            return $this->createUser($data);
+
+            $user = UserBuilder::make()
+                ->email($data['email'])
+                ->password($data["password"])
+                ->create();
+
+            SendVerificationEmailJob::dispatch($user);
+
+            return [
+                'user' => $user,
+                'token' => null,
+            ];
         });
     }
 
@@ -30,14 +36,19 @@ class AuthService
 
         $user = User::findOrFail($id);
 
+        if ($user->hasVerifiedEmail()) {
+            return [
+                'message' => 'Email already verified',
+                "status" => 404,
+            ];
+        }
+
         if (! hash_equals((string) $hash, sha1($user->email))) {
             throw new \Exception('Invalid verification link');
         }
 
-        if (! $user->hasVerifiedEmail()) {
-            $user->email_verified_at = now();
-            $user->save();
-        }
+        $user->email_verified_at = now();
+        $user->save();
 
         $token = $this->issueToken($user);
 
@@ -47,18 +58,26 @@ class AuthService
         ];
     }
 
-    public function resendVerificationEmail(User $user)
+    public function resendVerificationEmail(string $email): array
     {
+        $user = User::findByEmail($email)->first();
+
+        if (!$user) {
+            throw new \Exception('User not found');
+        }
+
         if ($user->hasVerifiedEmail()) {
             return [
-                "code" => 400
+                "status" => 404,
+                "message" => "Email already verified",
             ];
         }
 
         $user->sendEmailVerificationNotification();
 
         return [
-            "code" => 200
+            "status" => 200,
+            "message" => "Verification email sent",
         ];
     }
 
@@ -69,6 +88,37 @@ class AuthService
             $user = $this->authenticateUser($data);
             $token = $this->issueToken($user, 10);
 
+            return [
+                'user' => $user,
+                'token' => $token,
+            ];
+        });
+    }
+
+    public function googleLogin(string $idToken)
+    {
+        return DB::transaction(function () use ($idToken) {
+
+            $payload = $this->verifyGoogleToken($idToken);
+
+            [
+                'sub' => $googleId,
+                'email' => $email,
+            ] = $payload;
+
+            $user = User::where("provider_id", $googleId)->first();
+
+            if (! $user) {
+                $user = User::findByEmail($email)->first();
+
+                if ($user) {
+                    $user = $this->linkUserToGoogleAccount($user, $payload);
+                } else {
+                    $user = $this->createGoogleUser($payload);
+                }
+            }
+
+            $token = $this->issueToken($user, 10, "google");
             return [
                 'user' => $user,
                 'token' => $token,
@@ -88,19 +138,85 @@ class AuthService
 
     //======== Helper Functions =========//
 
-    private function createUser(array $data): array
+    private function verifyGoogleToken(string $idToken): array
     {
+        $client = new Google_Client();
+        $client->setClientId(config('services.google.client_id'));
 
-        $data['password'] = Hash::make($data['password']);
+        $payload = $client->verifyIdToken($idToken);
 
-        $user = User::create($data);
+        if (!$payload) {
+            throw new UnauthorizedHttpException('', 'Invalid Google token');
+        }
 
-        SendVerificationEmailJob::dispatch($user);
+        if (!isset($payload['sub'], $payload['email'])) {
+            throw new UnauthorizedHttpException('', 'Invalid Google payload');
+        }
 
-        return [
-            'user' => $user,
-            'token' => null,
-        ];
+        if (!in_array($payload['iss'], [
+            'accounts.google.com',
+            'https://accounts.google.com'
+        ])) {
+            throw new UnauthorizedHttpException('', 'Invalid issuer');
+        }
+
+        if ($payload['aud'] !== config('services.google.client_id')) {
+            throw new UnauthorizedHttpException('', 'Invalid audience');
+        }
+
+        if (!($payload['email_verified'] ?? false)) {
+            throw new UnauthorizedHttpException('', 'Email not verified');
+        }
+
+        return $payload;
+    }
+
+    private function linkUserToGoogleAccount(User $user, array $payload): User
+    {
+        [
+            'sub' => $googleId,
+            'given_name' => $firstName,
+            'family_name' => $lastName,
+            'picture' => $picture,
+        ] = $payload;
+
+        $user->provider = UserProvider::GOOGLE;
+        $user->provider_id = $googleId;
+        if (!$user->hasVerifiedEmail()) {
+            $user->email_verified_at = now();
+        }
+        if ($user->image === null || $user->image === 'default.png') {
+            $user->image = $picture;
+        }
+        if (is_null($user->first_name)) {
+            $user->first_name = $firstName;
+        }
+        if (is_null($user->last_name)) {
+            $user->last_name = $lastName;
+        }
+        $user->save();
+
+        return $user;
+    }
+
+    private function createGoogleUser(array $payload): User
+    {
+        [
+            'sub' => $googleId,
+            'email' => $email,
+            'given_name' => $firstName,
+            'family_name' => $lastName,
+            'picture' => $picture,
+        ] = $payload;
+
+        return UserBuilder::make()
+            ->email($email)
+            ->firstName($firstName)
+            ->lastName($lastName)
+            ->google($googleId)
+            ->avatar($picture)
+            ->verified()
+            ->create();
     }
 
     private function authenticateUser(array $data): User

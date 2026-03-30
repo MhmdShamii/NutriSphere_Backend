@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\UserProvider;
+use App\Enums\UserRole;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -22,6 +24,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'image',
         'first_name',
         'last_name',
+        'provider',
+        'provider_id',
         'email',
         'role',
         'profile_finished',
@@ -36,21 +40,15 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $hidden = [
         'password',
+        'provider_id',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+    protected $casts = [
+        'provider'         => UserProvider::class,
+        'role'             => UserRole::class,
+        'email_verified_at' => 'datetime',
+    ];
 
     // Relations
     public function country()

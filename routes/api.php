@@ -14,6 +14,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/check-email', [UserController::class, 'checkEmailExistence']);
         Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])->middleware(['signed'])->name('verification.verify');
         Route::post('/email/resend', [AuthController::class, 'resendVerification']);
+        Route::post('/google', [AuthController::class, 'googleLogin']);
     });
 
     Route::middleware('auth:sanctum')->group(function () {

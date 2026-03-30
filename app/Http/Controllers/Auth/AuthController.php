@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\ResendVerificationRequest;
 use App\Http\Resources\UserResource;
 use App\Http\Responses\ApiResponse;
 use App\Services\Auth\AuthService;
@@ -39,23 +40,50 @@ class AuthController extends Controller
     {
         $result = $this->authService->verifyEmail($request->route('id'), $request->route('hash'));
 
+        if (isset($result['status']) && $result['status'] === 404) {
+            return redirect()->to(
+                config('app.frontend_url') . '/not-found?message=' . urlencode($result['message'])
+            );
+        }
+
         return redirect()->to(
             config('app.frontend_url') . '/auth/verify-success?token=' . $result['token']
         );
     }
-    public function resendVerification(Request $request)
-    {
-        $result = $this->authService->resendVerificationEmail($request->user());
 
-        return $result['code'] == 200 ?
-            $this->success(null, "Verification email sent", status: $result['code']) :
-            $this->success(null, "Email already verified", status: $result['code']);
+    public function resendVerification(ResendVerificationRequest $request)
+    {
+        $result = $this->authService->resendVerificationEmail($request->validated()['email']);
+
+        return $result['status'] == 200 ?
+            $this->success(null, "Verification email sent", status: $result['status']) :
+            $this->success(null, "Email already verified", status: $result['status']);
     }
 
     public function login(LoginRequest $loginRequest): JsonResponse
     {
         try {
             $result = $this->authService->login($loginRequest->validated());
+
+            return $this->success(
+                $this->authResponseData($result['user'], $result['token']),
+                'User logged in successfully',
+                status: 200
+            );
+        } catch (UnauthorizedHttpException $e) {
+            return $this->error($e->getMessage(), 401);
+        }
+    }
+
+    public function googleLogin(Request $request): JsonResponse
+    {
+        try {
+
+            $request->validate([
+                "id_token" => "required|string",
+            ]);
+
+            $result = $this->authService->googleLogin($request['id_token']);
 
             return $this->success(
                 $this->authResponseData($result['user'], $result['token']),

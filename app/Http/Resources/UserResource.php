@@ -13,6 +13,19 @@ class UserResource extends JsonResource
      *
      * @return array<string, mixed>
      */
+    private function resolveAvatarUrl(): string
+    {
+        if ($this->image === null || $this->image === 'default.png') {
+            return asset('storage/avatars/default.png');
+        }
+
+        if (str_starts_with($this->image, 'http')) {
+            return $this->image;
+        }
+
+        return Storage::disk('public')->url($this->image);
+    }
+
     public function toArray(Request $request): array
     {
         return [
@@ -25,9 +38,7 @@ class UserResource extends JsonResource
                 'name'       => $this->country?->name,
             ],
             'image' => [
-                'avatar' => $this->image === 'default.png'
-                    ? asset('storage/avatars/default.png')
-                    : Storage::disk('public')->url($this->image),
+                'avatar' => $this->resolveAvatarUrl(),
             ],
             'verified'   => $this->email_verified_at !== null,
             'role' => $this->role,
