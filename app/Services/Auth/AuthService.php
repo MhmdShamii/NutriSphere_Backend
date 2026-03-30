@@ -225,8 +225,12 @@ class AuthService
         if (!$this->isValidUser($user, $data['password'])) {
             throw new UnauthorizedHttpException('', 'Invalid credentials');
         }
-
+        if (! $user->hasVerifiedEmail()) {
+            throw new UnauthorizedHttpException('', 'Email not verified');
+        }
         return $user;
+                // In a real app, you'd want to handle this more gracefully
+                alert("Please fill in all fields")
     }
 
     private function isValidUser(?User $user, string $password): bool
