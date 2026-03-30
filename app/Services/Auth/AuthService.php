@@ -223,6 +223,9 @@ class AuthService
     {
         $user = User::findByEmail($data['email'])->first();
 
+        if (!$user) {
+            throw new UnauthorizedHttpException('', 'invalid credentials');
+        }
         if ($user->provider !== UserProvider::LOCAL && ! $user->password) {
             throw new UnauthorizedHttpException('', 'Please login with ' . $user->provider->value);
         }
