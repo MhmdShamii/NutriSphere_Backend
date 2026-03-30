@@ -139,6 +139,12 @@ class AuthService
                 if ($user->image == "default.png") {
                     $user->image = $picture;
                 }
+                if (is_null($user->first_name)) {
+                    $user->first_name = $firstName;
+                }
+                if (is_null($user->last_name)) {
+                    $user->last_name = $lastName;
+                }
                 $user->save();
                 $token = $this->issueToken($user, 10, "google");
                 return [
