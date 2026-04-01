@@ -27,6 +27,8 @@ Route::prefix('v1')->group(function () {
             Route::get('/', [UserController::class, 'me']);
             Route::post('/avatar', [UserController::class, 'updateAvatar']);
             Route::delete('/avatar', [UserController::class, 'deleteAvatar']);
+            Route::post('/cover-image', [UserController::class, 'updateCoverImage']);
+            Route::delete('/cover-image', [UserController::class, 'deleteCoverImage']);
         });
 
         // for later

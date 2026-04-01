@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateAvatarRequest;
+use App\Http\Requests\UpdateCoverImageRequest;
 use App\Http\Resources\UserResource;
 use App\Http\Responses\ApiResponse;
 use App\Services\UserService;
@@ -60,6 +61,24 @@ class UserController extends Controller
         return $this->success(
             new UserResource($this->userService->deleteUserAvatar($request->user())),
             'User Avatar deleted Successfuly',
+            dataKey: 'user'
+        );
+    }
+
+    public function updateCoverImage(UpdateCoverImageRequest $request): JsonResponse
+    {
+        return $this->success(
+            new UserResource($this->userService->updateUserCoverImage($request->user(), $request->file('cover_image'))),
+            'Cover image updated successfully',
+            dataKey: 'user'
+        );
+    }
+
+    public function deleteCoverImage(Request $request): JsonResponse
+    {
+        return $this->success(
+            new UserResource($this->userService->deleteUserCoverImage($request->user())),
+            'Cover image deleted successfully',
             dataKey: 'user'
         );
     }

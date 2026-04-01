@@ -26,6 +26,15 @@ class UserResource extends JsonResource
         return Storage::disk('public')->url($this->image);
     }
 
+    private function resolveCoverImageUrl(): string
+    {
+        if ($this->cover_image === null || $this->cover_image === 'default_cover.png') {
+            return asset('storage/covers/default_cover.png');
+        }
+
+        return Storage::disk('public')->url($this->cover_image);
+    }
+
     public function toArray(Request $request): array
     {
         return [
@@ -38,7 +47,8 @@ class UserResource extends JsonResource
                 'name'       => $this->country?->name,
             ],
             'image' => [
-                'avatar' => $this->resolveAvatarUrl(),
+                'avatar'      => $this->resolveAvatarUrl(),
+                'cover_image' => $this->resolveCoverImageUrl(),
             ],
             'verified'   => $this->email_verified_at !== null,
             'role' => $this->role,

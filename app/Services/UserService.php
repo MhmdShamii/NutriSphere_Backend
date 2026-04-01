@@ -42,19 +42,56 @@ class UserService
         return $user;
     }
 
+    public function updateUserCoverImage(User $user, UploadedFile $file): User
+    {
+        if (!Storage::disk('public')->exists('covers')) {
+            Storage::disk('public')->makeDirectory('covers');
+        }
+
+        $oldPath = $user->cover_image;
+
+        $newPath = $file->storeAs(
+            'covers',
+            $this->generateImageName('Cover', $file),
+            'public'
+        );
+
+        try {
+            DB::transaction(function () use ($user, $newPath) {
+                $user->update(['cover_image' => $newPath]);
+            });
+
+            $this->deleteUserCoverImageFile($oldPath);
+
+            return $user->fresh();
+        } catch (\Throwable $e) {
+            $this->deleteUserCoverImageFile($newPath);
+
+            throw new \RuntimeException('Failed to update cover image. Please try again later.');
+        }
+    }
+
+    public function deleteUserCoverImage(User $user): User
+    {
+        $oldPath = $user->cover_image;
+
+        $user->update(['cover_image' => 'default_cover.png']);
+        $this->deleteUserCoverImageFile($oldPath);
+
+        return $user->fresh();
+    }
+
     // ====== Helper Functions ======
 
-    private function generateAvatarName(UploadedFile $file): string
+    private function generateImageName(string $prefix, UploadedFile $file): string
     {
-        $generateName =
-            "Avatar_" .
+        return $prefix .
+            "_" .
             pathinfo(str_replace(' ', '_', $file->getClientOriginalName()), PATHINFO_FILENAME) .
             "_" .
             Str::uuid() .
             "." .
             $file->extension();
-
-        return $generateName;
     }
 
     private function updateUserImage(User $user, UploadedFile $file): User
@@ -63,7 +100,7 @@ class UserService
 
         $newPath = $file->storeAs(
             'avatars',
-            $this->generateAvatarName($file),
+            $this->generateImageName('Avatar', $file),
             'public'
         );
 
@@ -93,6 +130,13 @@ class UserService
     private function deleteUserImageFile(?string $imagePath): void
     {
         if ($imagePath && $imagePath !== 'default.png') {
+            Storage::disk('public')->delete($imagePath);
+        }
+    }
+
+    private function deleteUserCoverImageFile(?string $imagePath): void
+    {
+        if ($imagePath && $imagePath !== 'default_cover.png') {
             Storage::disk('public')->delete($imagePath);
         }
     }
