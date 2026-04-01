@@ -16,7 +16,6 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string("image")->nullable()->default('default.png');
             $table->string('first_name')->nullable();
             $table->string("last_name")->nullable();
             $table->string('email')->unique();
@@ -29,6 +28,8 @@ return new class extends Migration
             $table->string('password')->nullable();
             $table->rememberToken();
             $table->timestamps();
+            $table->string("image")->nullable()->default('default.png');
+            $table->string('cover_image')->nullable()->default('default_cover.png');
             $table->unique(['provider', 'provider_id']);
         });
 
