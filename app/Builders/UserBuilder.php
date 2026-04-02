@@ -4,6 +4,7 @@ namespace App\Builders;
 
 use App\Models\User;
 use App\Enums\UserProvider;
+use App\Models\UserProfile;
 use Illuminate\Support\Facades\Hash;
 
 class UserBuilder
@@ -64,14 +65,13 @@ class UserBuilder
         return $this;
     }
 
-    public function profileIncomplete(): self
-    {
-        $this->data['profile_finished'] = false;
-        return $this;
-    }
 
     public function create(): User
     {
-        return User::create($this->data);
+        $user = User::create($this->data);
+        UserProfile::create([
+            'user_id' => $user->id,
+        ]);
+        return $user;
     }
 }
