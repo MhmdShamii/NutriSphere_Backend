@@ -50,9 +50,10 @@ class UserResource extends JsonResource
                 'avatar'      => $this->resolveAvatarUrl(),
                 'cover_image' => $this->resolveCoverImageUrl(),
             ],
-            'verified'   => $this->email_verified_at !== null,
-            'role' => $this->role,
-            'onboarding_step' => $this->onboarding_step
+            'verified'        => $this->email_verified_at !== null,
+            'role'            => $this->role,
+            'onboarding_step' => $this->onboarding_step,
+            'profile'         => new UserProfileResource($this->whenLoaded('profile')),
         ];
     }
 }

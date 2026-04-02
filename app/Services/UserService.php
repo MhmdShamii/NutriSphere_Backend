@@ -15,7 +15,7 @@ class UserService
 
     public function returnUser(Request $request): User
     {
-        return $request->user();
+        return $request->user()->load('profile', 'country');
     }
 
     public function findUserEmailExist(string $email): bool
