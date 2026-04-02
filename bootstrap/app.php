@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureProfileFinished;
 use App\Http\Middleware\EnsureTokenIsNotExpired;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
@@ -14,5 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware): void {})
+    ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->alias([
+            'profile.finished' => EnsureProfileFinished::class,
+        ]);
+    })
     ->withExceptions(function (Exceptions $exceptions): void {})->create();
