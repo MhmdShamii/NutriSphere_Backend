@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\UserOnboardingSteps;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -83,8 +84,15 @@ class UserService
 
     public function updateUser(User $user, array $data): User
     {
-        $data['profile_finished'] = $this->checkCompleteUserInfo($user, $data);
         $user->update($data);
+        return $user->fresh();
+    }
+
+    public function completeMainInfo(User $user): User
+    {
+        if ($user->onboarding_step === UserOnboardingSteps::MAIN_INFO) {
+            $user->update(['onboarding_step' => UserOnboardingSteps::BASIC_INFO]);
+        }
         return $user->fresh();
     }
 
@@ -148,15 +156,4 @@ class UserService
         }
     }
 
-    private function checkCompleteUserInfo(User $user, array $newData): bool
-    {
-        $required = ['first_name', 'last_name', 'country_id'];
-
-        foreach ($required as $field) {
-            $value = $newData[$field] ?? $user->$field;
-            if (!$value) return false;
-        }
-
-        return true;
-    }
 }

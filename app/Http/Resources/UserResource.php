@@ -52,7 +52,7 @@ class UserResource extends JsonResource
             ],
             'verified'   => $this->email_verified_at !== null,
             'role' => $this->role,
-            'profile_finished' => $this->profile_finished
+            'onboarding_step' => $this->onboarding_step
         ];
     }
 }

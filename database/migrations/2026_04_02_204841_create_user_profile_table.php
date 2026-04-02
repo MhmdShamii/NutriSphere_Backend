@@ -3,7 +3,6 @@
 use App\Enums\UserActivityLevels;
 use App\Enums\UserDietaryPreferences;
 use App\Enums\UserGoal;
-use App\Enums\UserOnboardingSteps;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;

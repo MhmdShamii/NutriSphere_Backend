@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\UserOnboardingSteps;
 use App\Enums\UserProvider;
 use App\Enums\UserRole;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -30,7 +31,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'email_verified_at',
         'role',
-        'profile_finished',
+        'onboarding_step',
         'country_id',
         'password',
     ];
@@ -49,6 +50,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $casts = [
         'provider'         => UserProvider::class,
         'role'             => UserRole::class,
+        'onboarding_step'  => UserOnboardingSteps::class,
         'email_verified_at' => 'datetime',
     ];
 

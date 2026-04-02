@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CompleteMainInfoRequest;
 use App\Http\Requests\UpdateAvatarRequest;
 use App\Http\Requests\UpdateCoverImageRequest;
 use App\Http\Requests\UpdateUserRequest;
@@ -51,6 +52,18 @@ class UserController extends Controller
         return $this->success(
             new UserResource($this->userService->updateUser($request->user(), $request->validated())),
             'User updated successfully',
+            dataKey: 'user'
+        );
+    }
+
+    public function completeMainInfo(CompleteMainInfoRequest $request): JsonResponse
+    {
+        $user = $this->userService->updateUser($request->user(), $request->validated());
+        $user = $this->userService->completeMainInfo($user);
+
+        return $this->success(
+            new UserResource($user),
+            'Main info completed successfully',
             dataKey: 'user'
         );
     }
