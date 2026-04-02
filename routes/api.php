@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserProfileController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -26,6 +27,7 @@ Route::prefix('v1')->group(function () {
             Route::get('/', [UserController::class, 'me']);
             Route::patch('/', [UserController::class, 'updateUser']);
             Route::post('/complete-main-info', [UserController::class, 'completeMainInfo']);
+            Route::post('/complete-basic-info', [UserProfileController::class, 'completeBasicInfo']);
             Route::post('/avatar', [UserController::class, 'updateAvatar']);
             Route::delete('/avatar', [UserController::class, 'deleteAvatar']);
             Route::post('/cover-image', [UserController::class, 'updateCoverImage']);
