@@ -81,6 +81,13 @@ class UserService
         return $user->fresh();
     }
 
+    public function updateUser(User $user, array $data): User
+    {
+        $data['profile_finished'] = $this->checkCompleteUserInfo($user, $data);
+        $user->update($data);
+        return $user->fresh();
+    }
+
     // ====== Helper Functions ======
 
     private function generateImageName(string $prefix, UploadedFile $file): string
@@ -139,5 +146,17 @@ class UserService
         if ($imagePath && $imagePath !== 'default_cover.png') {
             Storage::disk('public')->delete($imagePath);
         }
+    }
+
+    private function checkCompleteUserInfo(User $user, array $newData): bool
+    {
+        $required = ['first_name', 'last_name', 'country_id'];
+
+        foreach ($required as $field) {
+            $value = $newData[$field] ?? $user->$field;
+            if (!$value) return false;
+        }
+
+        return true;
     }
 }

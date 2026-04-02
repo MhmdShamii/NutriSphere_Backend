@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateAvatarRequest;
 use App\Http\Requests\UpdateCoverImageRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Http\Responses\ApiResponse;
 use App\Services\UserService;
@@ -41,6 +42,15 @@ class UserController extends Controller
         return $this->success(
             new UserResource($this->userService->returnUser($request)),
             'User retrieved successfully',
+            dataKey: 'user'
+        );
+    }
+
+    public function updateUser(UpdateUserRequest $request): JsonResponse
+    {
+        return $this->success(
+            new UserResource($this->userService->updateUser($request->user(), $request->validated())),
+            'User updated successfully',
             dataKey: 'user'
         );
     }
