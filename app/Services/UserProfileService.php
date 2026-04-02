@@ -2,7 +2,10 @@
 
 namespace App\Services;
 
+use App\Enums\UserActivityLevels;
+use App\Enums\UserGoal;
 use App\Enums\UserOnboardingSteps;
+use App\Models\UserProfile;
 use Illuminate\Support\Facades\DB;
 
 class UserProfileService
@@ -11,27 +14,57 @@ class UserProfileService
     {
         DB::transaction(function () use ($user, $profileData) {
             $user->profile()->update($profileData);
-            $user->profile->save();
 
-            $user->onboarding_step = UserOnboardingSteps::TARGETS;
-            $user->save();
+            $profile = $user->profile()->first();
+            $targets = $this->mifflinStJeorEstimation($profile);
+            $user->profile()->update($targets);
+
+            $user->update(['onboarding_step' => UserOnboardingSteps::TARGETS]);
         });
+
         return $user->profile()->first();
     }
 
-
-
     //============== Helper Functions =============
 
-    private function calculateDailyTargets($profile)
+    private function mifflinStJeorEstimation(UserProfile $profile): array
     {
-        // Implement the logic to calculate daily calorie, protein, carbs, and fat targets
-        // based on the user's profile information
+        $age = $profile->date_of_birth->age;
+
+        $bmr = (10 * $profile->weight_kg)
+            + (6.25 * $profile->height_cm)
+            - (5 * $age)
+            + ($profile->gender === 'male' ? 5 : -161);
+
+        $tdee = $bmr * $this->activityMultiplier($profile->activity_level);
+
+        $calories = (int) round($tdee + $this->goalAdjustment($profile->goal));
+
         return [
-            'daily_calorie_target' => 2000, // Example value
-            'daily_protein_g' => 150,      // Example value
-            'daily_carbs_g' => 250,        // Example value
-            'daily_fat_g' => 70,           // Example value
+            'daily_calorie_target' => $calories,
+            'daily_protein_g'      => (int) round(($calories * 0.30) / 4),
+            'daily_carbs_g'        => (int) round(($calories * 0.45) / 4),
+            'daily_fat_g'          => (int) round(($calories * 0.25) / 9),
         ];
+    }
+
+    private function activityMultiplier(UserActivityLevels $level): float
+    {
+        return match ($level) {
+            UserActivityLevels::SEDENTARY  => 1.2,
+            UserActivityLevels::LIGHT      => 1.375,
+            UserActivityLevels::MODERATE   => 1.55,
+            UserActivityLevels::ACTIVE     => 1.725,
+            UserActivityLevels::VERY_ACTIVE => 1.9,
+        };
+    }
+
+    private function goalAdjustment(UserGoal $goal): int
+    {
+        return match ($goal) {
+            UserGoal::LOSE_WEIGHT => -500,
+            UserGoal::MAINTAIN    => 0,
+            UserGoal::GAIN_MUSCLE => 300,
+        };
     }
 }
