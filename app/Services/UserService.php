@@ -155,5 +155,4 @@ class UserService
             Storage::disk('public')->delete($imagePath);
         }
     }
-
 }
