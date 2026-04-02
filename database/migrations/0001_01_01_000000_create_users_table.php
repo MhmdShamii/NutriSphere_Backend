@@ -19,9 +19,9 @@ return new class extends Migration
             $table->string('first_name')->nullable();
             $table->string("last_name")->nullable();
             $table->string('email')->unique();
-            $table->string('provider')->default(UserProvider::LOCAL->value);
+            $table->enum('provider', UserProvider::cases())->default(UserProvider::LOCAL);
             $table->string("provider_id")->nullable();
-            $table->string('role')->default(UserRole::CLIENT->value);
+            $table->enum('role', UserRole::cases())->default(UserRole::CLIENT);
             $table->boolean("profile_finished")->default(false);
             $table->foreignId('country_id')->nullable()->constrained('countries')->restrictOnDelete();
             $table->timestamp('email_verified_at')->nullable();
