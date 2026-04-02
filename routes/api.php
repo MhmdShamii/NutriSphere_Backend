@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
-use App\Http\Controllers\CountryController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -30,8 +29,5 @@ Route::prefix('v1')->group(function () {
             Route::post('/cover-image', [UserController::class, 'updateCoverImage']);
             Route::delete('/cover-image', [UserController::class, 'deleteCoverImage']);
         });
-
-        // for later
-        // Route::get('/countries/{code}/users', [CountryController::class, 'getCountryUsers']);
     });
 });
