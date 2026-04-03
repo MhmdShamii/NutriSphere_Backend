@@ -25,6 +25,16 @@ class UserProfileService
         return $user->profile()->first();
     }
 
+    public function completeTargets($user, array $targets)
+    {
+        DB::transaction(function () use ($user, $targets) {
+            $user->profile()->update($targets);
+            $user->update(['onboarding_step' => UserOnboardingSteps::COMPLETE]);
+        });
+
+        return $user->profile()->first();
+    }
+
     //============== Helper Functions =============
 
     private function mifflinStJeorEstimation(UserProfile $profile): array

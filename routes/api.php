@@ -28,6 +28,7 @@ Route::prefix('v1')->group(function () {
             Route::patch('/', [UserController::class, 'updateUser']);
             Route::post('/complete-main-info', [UserController::class, 'completeMainInfo']);
             Route::post('/complete-basic-info', [UserProfileController::class, 'completeBasicInfo']);
+            Route::post('/complete-targets', [UserProfileController::class, 'completeTargets']);
             Route::post('/avatar', [UserController::class, 'updateAvatar']);
             Route::delete('/avatar', [UserController::class, 'deleteAvatar']);
             Route::post('/cover-image', [UserController::class, 'updateCoverImage']);
