@@ -20,7 +20,8 @@ class UserProfileService
             $user->profile()->update($targets);
 
             if ($user->onboarding_step === UserOnboardingSteps::BASIC_INFO) {
-                $user->update(['onboarding_step' => UserOnboardingSteps::TARGETS]);
+                $user->onboarding_step = UserOnboardingSteps::TARGETS;
+                $user->save();
             }
         });
 
@@ -33,7 +34,8 @@ class UserProfileService
             $user->profile()->update($targets);
 
             if ($user->onboarding_step === UserOnboardingSteps::TARGETS) {
-                $user->update(['onboarding_step' => UserOnboardingSteps::COMPLETE]);
+                $user->onboarding_step = UserOnboardingSteps::COMPLETE;
+                $user->save();
             }
         });
 

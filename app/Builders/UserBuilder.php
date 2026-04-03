@@ -68,7 +68,7 @@ class UserBuilder
 
     public function create(): User
     {
-        $user = User::create($this->data);
+        $user = User::forceCreate($this->data);
         UserProfile::create([
             'user_id' => $user->id,
         ]);

@@ -91,7 +91,8 @@ class UserService
     public function completeMainInfo(User $user): User
     {
         if ($user->onboarding_step === UserOnboardingSteps::MAIN_INFO) {
-            $user->update(['onboarding_step' => UserOnboardingSteps::BASIC_INFO]);
+            $user->onboarding_step = UserOnboardingSteps::BASIC_INFO;
+            $user->save();
         }
         return $user->fresh();
     }
