@@ -19,7 +19,9 @@ class UserProfileService
             $targets = $this->mifflinStJeorEstimation($profile);
             $user->profile()->update($targets);
 
-            $user->update(['onboarding_step' => UserOnboardingSteps::TARGETS]);
+            if ($user->onboarding_step === UserOnboardingSteps::BASIC_INFO) {
+                $user->update(['onboarding_step' => UserOnboardingSteps::TARGETS]);
+            }
         });
 
         return $user->profile()->first();
@@ -29,7 +31,10 @@ class UserProfileService
     {
         DB::transaction(function () use ($user, $targets) {
             $user->profile()->update($targets);
-            $user->update(['onboarding_step' => UserOnboardingSteps::COMPLETE]);
+
+            if ($user->onboarding_step === UserOnboardingSteps::TARGETS) {
+                $user->update(['onboarding_step' => UserOnboardingSteps::COMPLETE]);
+            }
         });
 
         return $user->profile()->first();

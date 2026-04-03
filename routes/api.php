@@ -26,9 +26,9 @@ Route::prefix('v1')->group(function () {
         Route::prefix('me')->group(function () {
             Route::get('/', [UserController::class, 'me']);
             Route::patch('/', [UserController::class, 'updateUser']);
-            Route::post('/complete-main-info', [UserController::class, 'completeMainInfo']);
-            Route::post('/complete-basic-info', [UserProfileController::class, 'completeBasicInfo']);
-            Route::post('/complete-targets', [UserProfileController::class, 'completeTargets']);
+            Route::post('/complete-main-info', [UserController::class, 'completeMainInfo'])->middleware('ensure.step:main_info');
+            Route::post('/complete-basic-info', [UserProfileController::class, 'completeBasicInfo'])->middleware('ensure.step:basic_info');
+            Route::post('/complete-targets', [UserProfileController::class, 'completeTargets'])->middleware('ensure.step:targets');
             Route::post('/avatar', [UserController::class, 'updateAvatar']);
             Route::delete('/avatar', [UserController::class, 'deleteAvatar']);
             Route::post('/cover-image', [UserController::class, 'updateCoverImage']);
