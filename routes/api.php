@@ -32,9 +32,10 @@ Route::prefix('v1')->group(function () {
             Route::post('/complete-main-info', [UserController::class, 'completeMainInfo'])->middleware('ensure.step:main_info');
             Route::post('/complete-basic-info', [UserProfileController::class, 'completeBasicInfo'])->middleware('ensure.step:basic_info');
             Route::post('/complete-targets', [UserProfileController::class, 'completeTargets'])->middleware('ensure.step:targets');
-            Route::get('/health-conditions', [HealthConditionController::class, 'userConditions']);
-            Route::post('/health-conditions', [HealthConditionController::class, 'add']);
-            Route::delete('/health-conditions/{id}', [HealthConditionController::class, 'remove']);
+            Route::get('/health-conditions', [HealthConditionController::class, 'userConditions'])->middleware('ensure.step:health_conditions');
+            Route::post('/health-conditions', [HealthConditionController::class, 'add'])->middleware('ensure.step:health_conditions');
+            Route::delete('/health-conditions/{id}', [HealthConditionController::class, 'remove'])->middleware('ensure.step:health_conditions');
+            Route::post('/complete-health-conditions', [HealthConditionController::class, 'completeHealthConditions'])->middleware('ensure.step:health_conditions');
             Route::post('/avatar', [UserController::class, 'updateAvatar']);
             Route::delete('/avatar', [UserController::class, 'deleteAvatar']);
             Route::post('/cover-image', [UserController::class, 'updateCoverImage']);

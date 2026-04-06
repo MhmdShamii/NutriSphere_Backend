@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\UserOnboardingSteps;
 use App\Models\HealthCondition;
 use App\Models\User;
 use App\Models\UserHealthCondition;
@@ -44,6 +45,14 @@ class HealthConditionService
             'health_condition_id' => $conditionId,
             'custom_condition'    => $custom,
         ]);
+    }
+
+    public function completeHealthConditions(User $user): void
+    {
+        if ($user->onboarding_step === UserOnboardingSteps::HEALTH_CONDITIONS) {
+            $user->onboarding_step = UserOnboardingSteps::COMPLETE;
+            $user->save();
+        }
     }
 
     public function removeCondition(User $user, int $id): void

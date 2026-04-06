@@ -34,7 +34,7 @@ class UserProfileService
             $user->profile()->update($targets);
 
             if ($user->onboarding_step === UserOnboardingSteps::TARGETS) {
-                $user->onboarding_step = UserOnboardingSteps::COMPLETE;
+                $user->onboarding_step = UserOnboardingSteps::HEALTH_CONDITIONS;
                 $user->save();
             }
         });

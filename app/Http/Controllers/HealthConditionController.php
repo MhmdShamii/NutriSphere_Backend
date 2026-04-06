@@ -37,6 +37,13 @@ class HealthConditionController extends Controller
         return $this->success(new UserHealthConditionResource($condition->load('condition')), 'Condition added successfully', 'condition', 201);
     }
 
+    public function completeHealthConditions(Request $request): JsonResponse
+    {
+        $this->healthConditionService->completeHealthConditions($request->user());
+
+        return $this->success(message: 'Health conditions step completed successfully');
+    }
+
     public function remove(Request $request, int $id): JsonResponse
     {
         $this->healthConditionService->removeCondition($request->user(), $id);
