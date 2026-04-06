@@ -27,6 +27,7 @@ class CompleteMainInfoRequest extends FormRequest
             'first_name'   => 'required|string|max:255',
             'last_name'    => 'required|string|max:255',
             'country_code' => 'required|string|size:3',
+            'country_id'   => 'sometimes|integer|exists:countries,id',
         ];
     }
 
