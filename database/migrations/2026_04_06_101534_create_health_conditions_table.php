@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\HealthConditionSeverity;
+use App\Enums\HealthConditionType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,8 +17,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('slug')->unique();
-            $table->enum('type', ['disease', 'allergy', 'intolerance']);
-            $table->enum('severity', ['block', 'warn', 'adjust']);
+            $table->enum('type', HealthConditionType::cases());
+            $table->enum('severity', HealthConditionSeverity::cases());
             $table->timestamps();
         });
     }
