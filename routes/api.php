@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\HealthConditionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserProfileController;
 use Illuminate\Support\Facades\Route;
@@ -18,6 +19,8 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/health-conditions', [HealthConditionController::class, 'index']);
+
         Route::prefix('auth')->group(function () {
             Route::post('/logout', [AuthController::class, 'logout']);
             Route::post('/logout-all', [AuthController::class, 'logoutFromAllDevices']);
@@ -29,6 +32,9 @@ Route::prefix('v1')->group(function () {
             Route::post('/complete-main-info', [UserController::class, 'completeMainInfo'])->middleware('ensure.step:main_info');
             Route::post('/complete-basic-info', [UserProfileController::class, 'completeBasicInfo'])->middleware('ensure.step:basic_info');
             Route::post('/complete-targets', [UserProfileController::class, 'completeTargets'])->middleware('ensure.step:targets');
+            Route::get('/health-conditions', [HealthConditionController::class, 'userConditions']);
+            Route::post('/health-conditions', [HealthConditionController::class, 'add']);
+            Route::delete('/health-conditions/{id}', [HealthConditionController::class, 'remove']);
             Route::post('/avatar', [UserController::class, 'updateAvatar']);
             Route::delete('/avatar', [UserController::class, 'deleteAvatar']);
             Route::post('/cover-image', [UserController::class, 'updateCoverImage']);
