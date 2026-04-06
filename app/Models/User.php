@@ -58,6 +58,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(UserProfile::class);
     }
 
+    public function healthConditions()
+    {
+        return $this->hasMany(UserHealthCondition::class);
+    }
+
     // Query scopes
 
     public function scopeFindByEmail($query, string $email)
