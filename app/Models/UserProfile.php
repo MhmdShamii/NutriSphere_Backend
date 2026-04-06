@@ -17,6 +17,7 @@ class UserProfile extends Model
         'gender',
         'weight_kg',
         'height_cm',
+        'body_fat_pct',
         'activity_level',
         'goal',
         'dietary_preferences',

@@ -31,6 +31,7 @@ class UserProfileBasicRequest extends FormRequest
             'gender' => ['required', 'in:male,female'],
             'weight_kg' => ['required', 'numeric', 'min:0'],
             'height_cm' => ['required', 'numeric', 'min:0'],
+            'body_fat_pct' => ['nullable', 'numeric', 'min:1', 'max:70'],
             'activity_level' => ['required', new Enum(UserActivityLevels::class)],
             'goal' => ['required', new Enum(UserGoal::class)],
             'dietary_preferences' => ['required', new Enum(UserDietaryPreferences::class)],
