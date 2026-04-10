@@ -15,14 +15,14 @@ class UserProfileController extends Controller
 
     public function __construct(private UserProfileService $userProfileService) {}
 
-    public function completeBasicInfo(UserProfileBasicRequest $request): JsonResponse
+    public function storeBasicInfo(UserProfileBasicRequest $request): JsonResponse
     {
         $profile = $this->userProfileService->completeBasicInfo($request->user(), $request->validated());
 
         return $this->success(new UserProfileResource($profile), 'Basic info completed successfully', dataKey: 'profile');
     }
 
-    public function completeTargets(UserProfileCompleteRequest $request): JsonResponse
+    public function storeTargets(UserProfileCompleteRequest $request): JsonResponse
     {
         $profile = $this->userProfileService->completeTargets($request->user(), $request->validated());
 

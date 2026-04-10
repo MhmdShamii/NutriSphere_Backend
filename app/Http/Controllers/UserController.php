@@ -23,7 +23,7 @@ class UserController extends Controller
         $this->userService = $userService;
     }
 
-    public function checkEmailExistence(Request $request): JsonResponse
+    public function checkEmail(Request $request): JsonResponse
     {
         $request->validate([
             'email' => 'required|email',
@@ -38,7 +38,7 @@ class UserController extends Controller
         );
     }
 
-    public function me(Request $request): JsonResponse
+    public function show(Request $request): JsonResponse
     {
         return $this->success(
             new UserResource($this->userService->returnUser($request)),
@@ -47,7 +47,7 @@ class UserController extends Controller
         );
     }
 
-    public function updateUser(UpdateUserRequest $request): JsonResponse
+    public function update(UpdateUserRequest $request): JsonResponse
     {
         return $this->success(
             new UserResource($this->userService->updateUser($request->user(), $request->validated())),
@@ -56,7 +56,7 @@ class UserController extends Controller
         );
     }
 
-    public function completeMainInfo(CompleteMainInfoRequest $request): JsonResponse
+    public function storeMainInfo(CompleteMainInfoRequest $request): JsonResponse
     {
         $user = $this->userService->updateUser($request->user(), $request->validated());
         $user = $this->userService->completeMainInfo($user);
@@ -68,7 +68,7 @@ class UserController extends Controller
         );
     }
 
-    public function updateAvatar(UpdateAvatarRequest $request): JsonResponse
+    public function storeAvatar(UpdateAvatarRequest $request): JsonResponse
     {
 
         return $this->success(
@@ -78,7 +78,7 @@ class UserController extends Controller
         );
     }
 
-    public function deleteAvatar(Request $request): JsonResponse
+    public function destroyAvatar(Request $request): JsonResponse
     {
 
         return $this->success(
@@ -88,7 +88,7 @@ class UserController extends Controller
         );
     }
 
-    public function updateCoverImage(UpdateCoverImageRequest $request): JsonResponse
+    public function storeCoverImage(UpdateCoverImageRequest $request): JsonResponse
     {
         return $this->success(
             new UserResource($this->userService->updateUserCoverImage($request->user(), $request->file('cover_image'))),
@@ -97,7 +97,7 @@ class UserController extends Controller
         );
     }
 
-    public function deleteCoverImage(Request $request): JsonResponse
+    public function destroyCoverImage(Request $request): JsonResponse
     {
         return $this->success(
             new UserResource($this->userService->deleteUserCoverImage($request->user())),
