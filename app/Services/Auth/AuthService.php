@@ -165,7 +165,7 @@ class AuthService
             throw new UnauthorizedHttpException('', 'Invalid audience');
         }
 
-        if (!($payload['email_verified'] ?? false)) {
+        if (!data_get($payload, 'email_verified', false)) {
             throw new UnauthorizedHttpException('', 'Email not verified');
         }
 

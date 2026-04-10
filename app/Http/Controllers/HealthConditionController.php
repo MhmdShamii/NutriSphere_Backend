@@ -23,7 +23,7 @@ class HealthConditionController extends Controller
         return $this->success(HealthConditionResource::collection($conditions), dataKey: 'conditions');
     }
 
-    public function userConditions(Request $request): JsonResponse
+    public function getUserConditions(Request $request): JsonResponse
     {
         $conditions = $this->healthConditionService->getUserConditions($request->user());
 

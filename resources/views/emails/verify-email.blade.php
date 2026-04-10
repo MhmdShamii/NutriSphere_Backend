@@ -28,22 +28,6 @@
           style="max-width:520px;margin:0 auto;">
           <tr>
             <td>
-
-              <!-- Radial glow layer -->
-              <div style="position:relative;">
-                <div style="
-                  position:absolute;
-                  top:50%;
-                  left:50%;
-                  transform:translate(-50%,-50%);
-                  width:480px;
-                  height:320px;
-                  background:radial-gradient(ellipse at center, rgba(127,250,136,0.13) 0%, transparent 70%);
-                  filter:blur(32px);
-                  pointer-events:none;
-                  z-index:0;
-                "></div>
-
                 <!-- Card -->
                 <div style="
                   position:relative;
@@ -76,7 +60,7 @@
                       color:#ffffff;
                       line-height:1;
                     ">
-                      Nutri<span style="color:#7FFA88;">Sphere</span>
+                      <span style="color:#7FFA88;">Nutri</span>Sphere
                     </div>
                   </div>
 
