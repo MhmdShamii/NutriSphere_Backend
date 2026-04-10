@@ -1,10 +1,10 @@
 <?php
 
+use App\Enums\UserOnboardingSteps;
 use App\Enums\UserProvider;
 use App\Enums\UserRole;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -16,19 +16,20 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string("image")->nullable()->default('default.png');
             $table->string('first_name')->nullable();
             $table->string("last_name")->nullable();
             $table->string('email')->unique();
-            $table->string('provider')->default(UserProvider::LOCAL->value);
+            $table->enum('provider', UserProvider::cases())->default(UserProvider::LOCAL);
             $table->string("provider_id")->nullable();
-            $table->string('role')->default(UserRole::CLIENT->value);
-            $table->boolean("profile_finished")->default(false);
+            $table->enum('role', UserRole::cases())->default(UserRole::CLIENT);
+            $table->enum('onboarding_step', UserOnboardingSteps::cases())->default(UserOnboardingSteps::MAIN_INFO);
             $table->foreignId('country_id')->nullable()->constrained('countries')->restrictOnDelete();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->nullable();
             $table->rememberToken();
             $table->timestamps();
+            $table->string("image")->nullable()->default('default.png');
+            $table->string('cover_image')->nullable()->default('default_cover.png');
             $table->unique(['provider', 'provider_id']);
         });
 

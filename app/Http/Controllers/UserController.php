@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CompleteMainInfoRequest;
 use App\Http\Requests\UpdateAvatarRequest;
+use App\Http\Requests\UpdateCoverImageRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Http\Responses\ApiResponse;
 use App\Services\UserService;
@@ -20,7 +23,7 @@ class UserController extends Controller
         $this->userService = $userService;
     }
 
-    public function checkEmailExistence(Request $request): JsonResponse
+    public function checkEmail(Request $request): JsonResponse
     {
         $request->validate([
             'email' => 'required|email',
@@ -35,7 +38,7 @@ class UserController extends Controller
         );
     }
 
-    public function me(Request $request): JsonResponse
+    public function show(Request $request): JsonResponse
     {
         return $this->success(
             new UserResource($this->userService->returnUser($request)),
@@ -44,7 +47,28 @@ class UserController extends Controller
         );
     }
 
-    public function updateAvatar(UpdateAvatarRequest $request): JsonResponse
+    public function update(UpdateUserRequest $request): JsonResponse
+    {
+        return $this->success(
+            new UserResource($this->userService->updateUser($request->user(), $request->validated())),
+            'User updated successfully',
+            dataKey: 'user'
+        );
+    }
+
+    public function storeMainInfo(CompleteMainInfoRequest $request): JsonResponse
+    {
+        $user = $this->userService->updateUser($request->user(), $request->validated());
+        $user = $this->userService->completeMainInfo($user);
+
+        return $this->success(
+            new UserResource($user),
+            'Main info completed successfully',
+            dataKey: 'user'
+        );
+    }
+
+    public function storeAvatar(UpdateAvatarRequest $request): JsonResponse
     {
 
         return $this->success(
@@ -54,12 +78,30 @@ class UserController extends Controller
         );
     }
 
-    public function deleteAvatar(Request $request): JsonResponse
+    public function destroyAvatar(Request $request): JsonResponse
     {
 
         return $this->success(
             new UserResource($this->userService->deleteUserAvatar($request->user())),
             'User Avatar deleted Successfuly',
+            dataKey: 'user'
+        );
+    }
+
+    public function storeCoverImage(UpdateCoverImageRequest $request): JsonResponse
+    {
+        return $this->success(
+            new UserResource($this->userService->updateUserCoverImage($request->user(), $request->file('cover_image'))),
+            'Cover image updated successfully',
+            dataKey: 'user'
+        );
+    }
+
+    public function destroyCoverImage(Request $request): JsonResponse
+    {
+        return $this->success(
+            new UserResource($this->userService->deleteUserCoverImage($request->user())),
+            'Cover image deleted successfully',
             dataKey: 'user'
         );
     }

@@ -19,7 +19,7 @@ class CountryController extends Controller
         $this->countryService = $countryService;
     }
 
-    public function getCountryUsers(CountryUsersRequest $request): ResourceCollection
+    public function index(CountryUsersRequest $request): ResourceCollection
     {
         $users = $this->countryService->getUsersForCountry($request->code);
 

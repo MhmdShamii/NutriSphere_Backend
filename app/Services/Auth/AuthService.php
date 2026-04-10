@@ -2,10 +2,10 @@
 
 namespace App\Services\Auth;
 
-use App\Builders\UserBuilder;
 use App\Enums\UserProvider;
 use App\Jobs\SendVerificationEmailJob;
 use App\Models\User;
+use App\Models\UserProfile;
 use Google_Client;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -17,10 +17,11 @@ class AuthService
     {
         return DB::transaction(function () use ($data) {
 
-            $user = UserBuilder::make()
-                ->email($data['email'])
-                ->password($data["password"])
-                ->create();
+            $user = $this->createUser([
+                'email'    => $data['email'],
+                'password' => Hash::make($data['password']),
+                'provider' => UserProvider::LOCAL,
+            ]);
 
             SendVerificationEmailJob::dispatch($user);
 
@@ -164,7 +165,7 @@ class AuthService
             throw new UnauthorizedHttpException('', 'Invalid audience');
         }
 
-        if (!($payload['email_verified'] ?? false)) {
+        if (!data_get($payload, 'email_verified', false)) {
             throw new UnauthorizedHttpException('', 'Email not verified');
         }
 
@@ -203,22 +204,22 @@ class AuthService
 
     private function createGoogleUser(array $payload): User
     {
-        [
-            'sub' => $googleId,
-            'email' => $email,
-            'given_name' => $firstName,
-            'family_name' => $lastName,
-            'picture' => $picture,
-        ] = $payload;
+        return $this->createUser([
+            'email'             => $payload['email'],
+            'first_name'        => $payload['given_name'],
+            'last_name'         => $payload['family_name'],
+            'image'             => $payload['picture'],
+            'provider'          => UserProvider::GOOGLE,
+            'provider_id'       => $payload['sub'],
+            'email_verified_at' => now(),
+        ]);
+    }
 
-        return UserBuilder::make()
-            ->email($email)
-            ->firstName($firstName)
-            ->lastName($lastName)
-            ->google($googleId)
-            ->avatar($picture)
-            ->verified()
-            ->create();
+    private function createUser(array $attributes): User
+    {
+        $user = User::forceCreate($attributes);
+        UserProfile::create(['user_id' => $user->id]);
+        return $user;
     }
 
     private function authenticateUser(array $data): User

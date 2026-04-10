@@ -1,8 +1,9 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
-use App\Http\Controllers\CountryController;
+use App\Http\Controllers\HealthConditionController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserProfileController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -11,25 +12,34 @@ Route::prefix('v1')->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
         Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:register');
-        Route::post('/check-email', [UserController::class, 'checkEmailExistence']);
+        Route::post('/check-email', [UserController::class, 'checkEmail']);
         Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])->middleware(['signed'])->name('verification.verify');
         Route::post('/email/resend', [AuthController::class, 'resendVerification']);
         Route::post('/google', [AuthController::class, 'googleLogin']);
     });
 
     Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/health-conditions', [HealthConditionController::class, 'index']);
+
         Route::prefix('auth')->group(function () {
             Route::post('/logout', [AuthController::class, 'logout']);
             Route::post('/logout-all', [AuthController::class, 'logoutFromAllDevices']);
         });
 
-        Route::prefix('me')->group(function () {
-            Route::get('/', [UserController::class, 'me']);
-            Route::post('/avatar', [UserController::class, 'updateAvatar']);
-            Route::delete('/avatar', [UserController::class, 'deleteAvatar']);
+        Route::prefix('users/me')->group(function () {
+            Route::get('/', [UserController::class, 'show']);
+            Route::patch('/', [UserController::class, 'update']);
+            Route::post('/complete-main-info', [UserController::class, 'storeMainInfo'])->middleware('ensure.step:main_info');
+            Route::post('/complete-basic-info', [UserProfileController::class, 'storeBasicInfo'])->middleware('ensure.step:basic_info');
+            Route::post('/complete-targets', [UserProfileController::class, 'storeTargets'])->middleware('ensure.step:targets');
+            Route::get('/health-conditions', [HealthConditionController::class, 'userConditions'])->middleware('ensure.step:health_conditions');
+            Route::post('/health-conditions', [HealthConditionController::class, 'store'])->middleware('ensure.step:health_conditions');
+            Route::delete('/health-conditions/{id}', [HealthConditionController::class, 'destroy'])->middleware('ensure.step:health_conditions');
+            Route::post('/complete-health-conditions', [HealthConditionController::class, 'complete'])->middleware('ensure.step:health_conditions');
+            Route::post('/avatar', [UserController::class, 'storeAvatar']);
+            Route::delete('/avatar', [UserController::class, 'destroyAvatar']);
+            Route::post('/cover-image', [UserController::class, 'storeCoverImage']);
+            Route::delete('/cover-image', [UserController::class, 'destroyCoverImage']);
         });
-
-        // for later
-        // Route::get('/countries/{code}/users', [CountryController::class, 'getCountryUsers']);
     });
 });

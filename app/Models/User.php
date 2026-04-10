@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\UserOnboardingSteps;
 use App\Enums\UserProvider;
 use App\Enums\UserRole;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -22,16 +23,10 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $fillable = [
         'image',
+        'cover_image',
         'first_name',
         'last_name',
-        'provider',
-        'provider_id',
-        'email',
-        'email_verified_at',
-        'role',
-        'profile_finished',
         'country_id',
-        'password',
     ];
 
     /**
@@ -48,6 +43,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $casts = [
         'provider'         => UserProvider::class,
         'role'             => UserRole::class,
+        'onboarding_step'  => UserOnboardingSteps::class,
         'email_verified_at' => 'datetime',
     ];
 
@@ -55,6 +51,16 @@ class User extends Authenticatable implements MustVerifyEmail
     public function country()
     {
         return $this->belongsTo(Country::class);
+    }
+
+    public function profile()
+    {
+        return $this->hasOne(UserProfile::class);
+    }
+
+    public function healthConditions()
+    {
+        return $this->hasMany(UserHealthCondition::class);
     }
 
     // Query scopes
