@@ -3,19 +3,29 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateMealRequest;
-use Illuminate\Http\Request;
+use App\Services\MealService;
+use Illuminate\Http\JsonResponse;
 
 class MealController extends Controller
 {
-    public function store(CreateMealRequest $request)
+    public function __construct(
+        private MealService $mealService,
+    ) {}
+
+    public function store(CreateMealRequest $request): JsonResponse
     {
-        $validated = $request->validated();
-        $profile = $request->user();
-        dd($profile);
+        $profile = auth()->user()->profile;
+
+        $result = $this->mealService->create(
+            $profile,
+            $request->validated(),
+            $request->file('image')
+        );
 
         return response()->json([
-            'message' => 'Meal created successfully',
-            'meal' => $validated,
-        ], 201);
+            'status'  => 'normalized',
+            'message' => 'Ingredients normalized successfully',
+            'data'    => $result,
+        ], 200);
     }
 }
