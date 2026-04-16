@@ -9,12 +9,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('meal_ingredients', function (Blueprint $table) {
-            $table->string('fingerprint', 64);
+            $table->foreignId('meal_post_id')->constrained('meal_posts')->cascadeOnDelete();
             $table->foreignId('ingredient_id')->constrained('ingredients')->restrictOnDelete();
             $table->decimal('quantity_g', 8, 2);
 
-            $table->primary(['fingerprint', 'ingredient_id']);
-            $table->foreign('fingerprint')->references('fingerprint')->on('meal_macros')->restrictOnDelete();
+            $table->primary(['meal_post_id', 'ingredient_id']);
         });
     }
 
