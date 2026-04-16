@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\HealthConditionController;
+use App\Http\Controllers\MealController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserProfileController;
 use Illuminate\Support\Facades\Route;
@@ -40,6 +41,10 @@ Route::prefix('v1')->group(function () {
             Route::delete('/avatar', [UserController::class, 'destroyAvatar']);
             Route::post('/cover-image', [UserController::class, 'storeCoverImage']);
             Route::delete('/cover-image', [UserController::class, 'destroyCoverImage']);
+        });
+
+        Route::prefix('meals')->group(function () {
+            Route::post("/", [MealController::class, 'store']);
         });
     });
 });
