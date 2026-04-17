@@ -132,7 +132,7 @@ class CreateMealService
             $resolvedIngredients
         ));
 
-        $data = $this->openAi->calculateMacros($ingredientList) ?? $this->openAi->calculateMacros($ingredientList);
+        $data = $this->openAi->calculateMacros($ingredientList);
 
 
         if ($data === null) {

@@ -23,6 +23,7 @@ class MealPost extends Model
 
     protected $casts = [
         'confirmed_at' => 'datetime',
+        'servings'     => 'integer',
     ];
 
     // Relations
