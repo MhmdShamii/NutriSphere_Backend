@@ -182,16 +182,18 @@ class CreateMealService
 
         foreach ($items as $item) {
             $original = $unresolvedByName[$item['input']] ?? null;
+            $nameEn   = ucwords(strtolower($item['name_en']));
 
-            $match = $this->fuzzyCheckExistingIngredients($item['name_en']);
+            $match = $this->fuzzyCheckExistingIngredients($nameEn);
 
             if (!$match) {
                 $match = Ingredient::create([
-                    'name_en'  => $item['name_en'],
+                    'name_en'  => $nameEn,
                     'name_ar'  => data_get($item, 'name_ar'),
                     'source'   => 'user',
                     'verified' => false,
                 ]);
+                $this->cachedIngredients = null;
             }
 
             $resolved[] = [
@@ -239,7 +241,11 @@ class CreateMealService
 
         foreach ($this->cachedIngredients as $ingredient) {
             similar_text($input, $ingredient->name_en, $percentEn);
-            similar_text($input, $ingredient->name_ar ?? '', $percentAr);
+
+            $percentAr = 0.0;
+            if (!empty($ingredient->name_ar)) {
+                similar_text($input, $ingredient->name_ar, $percentAr);
+            }
 
             $score = max($percentEn, $percentAr);
 
@@ -264,7 +270,7 @@ class CreateMealService
         usort($items, fn($a, $b) => $a['id'] <=> $b['id']);
 
         $string = implode('|', array_map(
-            fn($item) => "{$item['id']}:{$item['portion']}:{$item['unit']}",
+            fn($item) => "{$item['id']}:" . number_format((float) $item['portion'], 2, '.', '') . ":{$item['unit']}",
             $items
         ));
 
