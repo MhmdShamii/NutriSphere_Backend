@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Models\Ingredient;
+use App\Models\MealMacro;
 use App\Models\UserProfile;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -62,15 +64,51 @@ class CreateMealService
         $normalizedIngredients = $this->normalizeIngredients($validated['ingredients']);
 
         DB::transaction(function () use ($profile, $validated, $normalizedIngredients) {
+
             $resolvedIngredients = $this->resolveIngredients($normalizedIngredients);
 
             $mealFingerPrint = $this->generateMealFingerprint($resolvedIngredients);
+
+            $macrosAndCalories = $this->calculateMacrosAndCalories($resolvedIngredients, $mealFingerPrint);
         });
 
         return [
             'status' => 'success',
             'message' => 'Meal created successfully',
         ];
+    }
+
+    //calculate calories and macros logic
+    private function calculateMacrosAndCalories(array $resolvedIngredients, string $mealFingerPrint): MealMacro
+    {
+        $cachedMeal = MealMacro::where('fingerprint', $mealFingerPrint)->first();
+
+        if ($cachedMeal) {
+            return $cachedMeal;
+        }
+
+        $ingredientList = implode("\n", array_map(
+            fn($item) => "{$item['ingredient']->name_en}: {$item['portion']} {$item['unit']}",
+            $resolvedIngredients
+        ));
+
+        $data = $this->openAi->calculateMacros($ingredientList) ?? $this->openAi->calculateMacros($ingredientList);
+
+
+        if ($data === null) {
+            throw new Exception(
+                'Could not calculate nutrition data. Please try again.'
+            );
+        }
+
+        return MealMacro::create([
+            'fingerprint' => $mealFingerPrint,
+            'calories'    => $data['calories'],
+            'protein'     => $data['protein'],
+            'carbs'       => $data['carbs'],
+            'fats'        => $data['fats'],
+            'fiber'       => $data['fiber'],
+        ]);
     }
 
 
