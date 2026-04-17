@@ -58,7 +58,7 @@ class CreateMealService
         $this->openAiService = $openAi;
     }
 
-    public function create(UserProfile $profile, array $validated, UploadedFile $image): array
+    public function create(UserProfile $profile, array $validated, UploadedFile $image): MealPost
     {
         foreach ($validated['ingredients'] as &$ingredient) {
             $ingredient['unit'] = $this->normalizeUnit($ingredient['unit']);
@@ -67,21 +67,14 @@ class CreateMealService
 
         $normalizedIngredients = $this->normalizeIngredients($validated['ingredients']);
 
-        DB::transaction(function () use ($profile, $validated, $normalizedIngredients, $image) {
-
-            $imageData = $this->uploadImage($image);
-
+        return DB::transaction(function () use ($profile, $validated, $normalizedIngredients, $image) {
+            $imageData           = $this->uploadImage($image);
             $resolvedIngredients = $this->resolveIngredients($normalizedIngredients);
-            $mealFingerPrint = $this->generateMealFingerprint($resolvedIngredients);
-            $macrosAndCalories = $this->calculateMacrosAndCalories($resolvedIngredients, $mealFingerPrint);
+            $mealFingerPrint     = $this->generateMealFingerprint($resolvedIngredients);
+            $macrosAndCalories   = $this->calculateMacrosAndCalories($resolvedIngredients, $mealFingerPrint);
 
-            $mealPost = $this->persistMeal($profile, $validated, $resolvedIngredients, $macrosAndCalories, $imageData);
+            return $this->persistMeal($profile, $validated, $resolvedIngredients, $macrosAndCalories, $imageData);
         });
-
-        return [
-            'status' => 'success',
-            'message' => 'Meal created successfully',
-        ];
     }
 
     //create meal post and link to user profile

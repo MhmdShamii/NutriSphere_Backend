@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateMealRequest;
+use App\Http\Resources\MealPostResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\MealPost;
 use App\Services\CreateMealService;
@@ -20,13 +21,13 @@ class MealController extends Controller
     {
         $profile = auth()->user()->profile;
 
-        $result = $this->CreateMealService->create(
+        $mealPost = $this->CreateMealService->create(
             $profile,
             $request->validated(),
             $request['image']
         );
 
-        return $this->success($result, "Review your meal before confirming", "meal", 202);
+        return $this->success(new MealPostResource($mealPost), "Review your meal before confirming", "meal", 202);
     }
 
     public function confirm(MealPost $meal): JsonResponse
