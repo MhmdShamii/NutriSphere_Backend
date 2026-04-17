@@ -26,7 +26,6 @@ class CreateMealRequest extends FormRequest
             'name'                => ['required', 'string', 'max:255'],
             'description'         => ['nullable', 'string', 'max:1000'],
             'visibility'          => ['required', 'in:public,private'],
-            'image'               => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'ingredients'         => ['required', 'array', 'min:1', 'max:20'],
             'ingredients.*.name'  => ['required', 'string', 'max:255'],
             'ingredients.*.portion' => ['required', 'numeric', 'min:0.1', 'max:10000'],

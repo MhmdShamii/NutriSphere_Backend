@@ -9,9 +9,7 @@ use App\Models\MealPostIngredient;
 use App\Models\MealPreparationStep;
 use App\Models\UserProfile;
 use Exception;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class CreateMealService
 {
@@ -56,7 +54,7 @@ class CreateMealService
 
     public function __construct(private OpenAiService $openAi) {}
 
-    public function create(UserProfile $profile, array $validated, UploadedFile $image): MealPost
+    public function create(UserProfile $profile, array $validated): MealPost
     {
         foreach ($validated['ingredients'] as &$ingredient) {
             $ingredient['unit'] = $this->normalizeUnit($ingredient['unit']);
@@ -65,18 +63,17 @@ class CreateMealService
 
         $normalizedIngredients = $this->normalizeIngredients($validated['ingredients']);
 
-        return DB::transaction(function () use ($profile, $validated, $normalizedIngredients, $image) {
-            $imageData           = $this->uploadImage($image);
+        return DB::transaction(function () use ($profile, $validated, $normalizedIngredients) {
             $resolvedIngredients = $this->resolveIngredients($normalizedIngredients);
             $mealFingerPrint     = $this->generateMealFingerprint($resolvedIngredients);
             $macrosAndCalories   = $this->calculateMacrosAndCalories($resolvedIngredients, $mealFingerPrint);
 
-            return $this->persistMeal($profile, $validated, $resolvedIngredients, $macrosAndCalories, $imageData);
+            return $this->persistMeal($profile, $validated, $resolvedIngredients, $macrosAndCalories);
         });
     }
 
     //create meal post and link to user profile
-    private function persistMeal(mixed $profile, array $validated, array $resolvedIngredients, MealMacro $macros, array $imageData): MealPost
+    private function persistMeal(mixed $profile, array $validated, array $resolvedIngredients, MealMacro $macros): MealPost
     {
         $mealPost = MealPost::create([
             'user_profile_id' => $profile->id,
@@ -85,7 +82,7 @@ class CreateMealService
             'description'     => $validated['description'] ?? null,
             'visibility'      => $validated['visibility'],
             'servings'        => $validated['servings'],
-            'image_url'       => $imageData['photo_url'],
+            'image_url'       => null,
             'confirmed_at'    => null,
         ]);
 
@@ -109,14 +106,6 @@ class CreateMealService
         $mealPost->load(['ingredients', 'mealMacro', 'preparationSteps']);
 
         return $mealPost;
-    }
-
-    private function uploadImage(UploadedFile $image): array
-    {
-        $path = $image->store('meals', 'public');
-        $url  = Storage::disk('public')->url($path);
-
-        return ['photo_path' => $path, 'photo_url' => $url];
     }
 
     //calculate calories and macros logic
