@@ -6,6 +6,7 @@ use App\Models\Ingredient;
 use App\Models\MealMacro;
 use App\Models\MealPost;
 use App\Models\MealPostIngredient;
+use App\Models\MealPreparationStep;
 use App\Models\UserProfile;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
@@ -95,7 +96,17 @@ class CreateMealService
             ]);
         }
 
-        return $mealPost->load(['ingredients', 'mealMacro']);
+        foreach ($validated['preparation_steps'] ?? [] as $index => $step) {
+            MealPreparationStep::create([
+                'meal_post_id' => $mealPost->id,
+                'step_number'  => $index + 1,
+                'description'  => $step['description'],
+            ]);
+        }
+
+        $mealPost->load(['ingredients', 'mealMacro', 'preparationSteps']);
+
+        return $mealPost;
     }
 
     private function uploadImage(UploadedFile $image): array

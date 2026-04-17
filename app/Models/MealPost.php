@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class MealPost extends Model
@@ -38,5 +39,10 @@ class MealPost extends Model
     public function mealMacro()
     {
         return $this->belongsTo(MealMacro::class, 'fingerprint', 'fingerprint');
+    }
+
+    public function preparationSteps(): HasMany
+    {
+        return $this->hasMany(MealPreparationStep::class)->orderBy('step_number');
     }
 }

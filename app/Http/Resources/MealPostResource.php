@@ -30,6 +30,10 @@ class MealPostResource extends JsonResource
                 'fats'     => $this->mealMacro->fats,
                 'fiber'    => $this->mealMacro->fiber,
             ]),
+            'preparation_steps' => $this->preparationSteps->map(fn($step) => [
+                'step_number' => $step->step_number,
+                'description' => $step->description,
+            ])->toArray(),
         ];
     }
 }
