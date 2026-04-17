@@ -9,14 +9,15 @@ use App\Models\MealPostIngredient;
 use App\Models\MealPreparationStep;
 use App\Models\UserProfile;
 use Exception;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class CreateMealService
 {
-    private ?Collection $cachedIngredients = null;
+    private const FUZZY_THRESHOLD   = 85;
+    private const FUZZY_CANDIDATES  = 20;
+
     private const UNIT_MAP = [
         'grams'       => 'g',
         'gram'        => 'g',
@@ -201,7 +202,6 @@ class CreateMealService
                     'source'   => 'user',
                     'verified' => false,
                 ]);
-                $this->cachedIngredients = null;
             }
 
             $resolved[] = [
@@ -240,15 +240,18 @@ class CreateMealService
 
     private function fuzzyCheckExistingIngredients(string $input): ?Ingredient
     {
-        if ($this->cachedIngredients === null) {
-            $this->cachedIngredients = Ingredient::all();
-        }
+        $prefix = mb_substr($input, 0, 3);
+
+        $candidates = Ingredient::where('name_en', 'LIKE', "{$prefix}%")
+            ->orWhere('name_ar', 'LIKE', "{$prefix}%")
+            ->limit(self::FUZZY_CANDIDATES)
+            ->get();
 
         $bestScore      = 0;
         $bestIngredient = null;
 
-        foreach ($this->cachedIngredients as $ingredient) {
-            similar_text($input, $ingredient->name_en, $percentEn);
+        foreach ($candidates as $ingredient) {
+            similar_text($input, strtolower($ingredient->name_en), $percentEn);
 
             $percentAr = 0.0;
             if (!empty($ingredient->name_ar)) {
@@ -262,7 +265,8 @@ class CreateMealService
                 $bestIngredient = $ingredient;
             }
         }
-        return $bestScore >= 85 ? $bestIngredient : null;
+
+        return $bestScore >= self::FUZZY_THRESHOLD ? $bestIngredient : null;
     }
 
     // Core logic to generate meal fingerprint
