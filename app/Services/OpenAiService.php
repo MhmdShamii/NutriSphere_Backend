@@ -34,16 +34,6 @@ class OpenAiService
         Ingredients: %s
         PROMPT;
 
-    private function callOpenAi($model, $maxTokens, $roll, $temparature = 0, $message)
-    {
-        return OpenAI::chat()->create([
-            'model'       => $model,
-            'temperature' => $temparature,
-            'max_tokens'  => $maxTokens,
-            'messages'    => [['role' => $roll, 'content' => $message]],
-        ]);
-    }
-
     public function resolveIngredientNames(array $names): array
     {
         $nameList = implode(', ', $names);
@@ -51,7 +41,12 @@ class OpenAiService
         $prompt = sprintf($this->resolveIngredientPrompt, $nameList);
 
         try {
-            $response = $this->callOpenAi(env('OPENAI_MODEL_STAGE1'), 1000, "user", message: $prompt);
+            $response = OpenAI::chat()->create([
+                'model'       => env('OPENAI_MODEL_STAGE1'),
+                'temperature' => 0,
+                'max_tokens'  => 1000,
+                'messages'    => [['role' => "user", 'content' => $prompt]],
+            ]);
             $items = json_decode($response->choices[0]->message->content, true);
 
             if (!is_array($items)) {
@@ -72,7 +67,12 @@ class OpenAiService
         $prompt = sprintf($this->calculateMacrosPrompt, $ingredientList);
 
         try {
-            $response = $this->callOpenAi(env('OPENAI_MODEL_STAGE2'), 300, "user", message: $prompt);
+            $response = OpenAI::chat()->create([
+                'model'       => env('OPENAI_MODEL_STAGE2'),
+                'temperature' => 0,
+                'max_tokens'  => 300,
+                'messages'    => [['role' => "user", 'content' => $prompt]],
+            ]);
             $data = json_decode($response->choices[0]->message->content, true);
 
             return $this->isMacroValid($data) ? $data : null;
