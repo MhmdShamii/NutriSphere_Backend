@@ -51,12 +51,8 @@ class CreateMealService
         'lbs'         => 'lb',
     ];
 
-    private $openAiService;
 
-    public function __construct(private OpenAiService $openAi)
-    {
-        $this->openAiService = $openAi;
-    }
+    public function __construct(private OpenAiService $openAi) {}
 
     public function create(UserProfile $profile, array $validated, UploadedFile $image): MealPost
     {
