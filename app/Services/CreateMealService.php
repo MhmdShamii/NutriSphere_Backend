@@ -4,10 +4,14 @@ namespace App\Services;
 
 use App\Models\Ingredient;
 use App\Models\MealMacro;
+use App\Models\MealPost;
+use App\Models\MealPostIngredient;
 use App\Models\UserProfile;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class CreateMealService
 {
@@ -54,7 +58,7 @@ class CreateMealService
         $this->openAiService = $openAi;
     }
 
-    public function create(UserProfile $profile, array $validated): array
+    public function create(UserProfile $profile, array $validated, UploadedFile $image): array
     {
         foreach ($validated['ingredients'] as &$ingredient) {
             $ingredient['unit'] = $this->normalizeUnit($ingredient['unit']);
@@ -63,19 +67,54 @@ class CreateMealService
 
         $normalizedIngredients = $this->normalizeIngredients($validated['ingredients']);
 
-        DB::transaction(function () use ($profile, $validated, $normalizedIngredients) {
+        DB::transaction(function () use ($profile, $validated, $normalizedIngredients, $image) {
+
+            $imageData = $this->uploadImage($image);
 
             $resolvedIngredients = $this->resolveIngredients($normalizedIngredients);
-
             $mealFingerPrint = $this->generateMealFingerprint($resolvedIngredients);
-
             $macrosAndCalories = $this->calculateMacrosAndCalories($resolvedIngredients, $mealFingerPrint);
+
+            $mealPost = $this->persistMeal($profile, $validated, $resolvedIngredients, $macrosAndCalories, $imageData);
         });
 
         return [
             'status' => 'success',
             'message' => 'Meal created successfully',
         ];
+    }
+
+    //create meal post and link to user profile
+    private function persistMeal(mixed $profile, array $validated, array $resolvedIngredients, MealMacro $macros, array $imageData): MealPost
+    {
+        $mealPost = MealPost::create([
+            'user_profile_id' => $profile->id,
+            'fingerprint'     => $macros->fingerprint,
+            'name'            => $validated['name'],
+            'description'     => $validated['description'] ?? null,
+            'visibility'      => $validated['visibility'],
+            'image_url'       => $imageData['photo_url'],
+            'confirmed_at'    => null,
+        ]);
+
+        foreach ($resolvedIngredients as $item) {
+            MealPostIngredient::create([
+                'meal_post_id'  => $mealPost->id,
+                'ingredient_id' => $item['ingredient']->id,
+                'portion'       => $item['portion'],
+                'unit'          => $item['unit'],
+            ]);
+        }
+
+        return $mealPost->load(['ingredients', 'mealMacro']);
+    }
+
+    private function uploadImage(UploadedFile $image): array
+    {
+        $path = $image->store('meals', 'public');
+        $url  = Storage::disk('public')->url($path);
+
+        return ['photo_path' => $path, 'photo_url' => $url];
     }
 
     //calculate calories and macros logic
@@ -111,9 +150,7 @@ class CreateMealService
         ]);
     }
 
-
     // Core logic to resolve ingredients
-
     private function resolveIngredients(array $normalizedIngredients): array
     {
         $resolved   = [];
@@ -176,7 +213,6 @@ class CreateMealService
     }
 
     //normalization and fuzzy matching logic
-
     private function normalizeUnit(string $unit): string
     {
         $unit = strtolower(trim($unit));

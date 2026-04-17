@@ -22,7 +22,8 @@ class MealController extends Controller
 
         $result = $this->CreateMealService->create(
             $profile,
-            $request->validated()
+            $request->validated(),
+            $request['image']
         );
 
         return $this->success($result, "Review your meal before confirming", "meal", 202);
