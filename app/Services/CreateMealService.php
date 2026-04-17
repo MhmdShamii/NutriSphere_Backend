@@ -61,11 +61,20 @@ class CreateMealService
 
         $normalizedIngredients = $this->normalizeIngredients($validated['ingredients']);
 
-        return DB::transaction(function () use ($profile, $validated, $normalizedIngredients) {
+        DB::transaction(function () use ($profile, $validated, $normalizedIngredients) {
             $resolvedIngredients = $this->resolveIngredients($normalizedIngredients);
-            dd($resolvedIngredients);
+
+            $mealFingerPrint = $this->generateMealFingerprint($resolvedIngredients);
         });
+
+        return [
+            'status' => 'success',
+            'message' => 'Meal created successfully',
+        ];
     }
+
+
+    // Core logic to resolve ingredients
 
     private function resolveIngredients(array $normalizedIngredients): array
     {
@@ -128,6 +137,8 @@ class CreateMealService
         return $resolved;
     }
 
+    //normalization and fuzzy matching logic
+
     private function normalizeUnit(string $unit): string
     {
         $unit = strtolower(trim($unit));
@@ -171,5 +182,25 @@ class CreateMealService
             }
         }
         return $bestScore >= 85 ? $bestIngredient : null;
+    }
+
+    // Core logic to generate meal fingerprint
+    private function generateMealFingerprint(array $resolvedIngredients): string
+    {
+        $items = array_map(fn($item) => [
+            'id'      => $item['ingredient']->id,
+            'portion' => $item['portion'],
+            'unit'    => $item['unit'],
+        ], $resolvedIngredients);
+
+
+        usort($items, fn($a, $b) => $a['id'] <=> $b['id']);
+
+        $string = implode('|', array_map(
+            fn($item) => "{$item['id']}:{$item['portion']}:{$item['unit']}",
+            $items
+        ));
+
+        return hash('sha256', $string);
     }
 }

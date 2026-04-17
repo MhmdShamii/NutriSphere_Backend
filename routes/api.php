@@ -44,7 +44,9 @@ Route::prefix('v1')->group(function () {
         });
 
         Route::prefix('meals')->group(function () {
-            Route::post("/", [MealController::class, 'store']);
+            Route::post('/', [MealController::class, 'store']);
+            Route::post('/{meal}/confirm', [MealController::class, 'confirm']);
+            Route::post('/{meal}/discard', [MealController::class, 'discard']);
         });
     });
 });

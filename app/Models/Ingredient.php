@@ -21,6 +21,6 @@ class Ingredient extends Model
     public function mealPosts()
     {
         return $this->belongsToMany(MealPost::class, 'meal_ingredients')
-                    ->withPivot('quantity_g');
+            ->withPivot('quantity_g');
     }
 }

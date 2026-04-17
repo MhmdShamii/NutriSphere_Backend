@@ -32,7 +32,7 @@ class MealPost extends Model
     public function ingredients()
     {
         return $this->belongsToMany(Ingredient::class, 'meal_ingredients')
-            ->withPivot('quantity_g');
+            ->withPivot('portion', 'unit');
     }
 
     public function mealMacro()
