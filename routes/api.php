@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\HealthConditionController;
+use App\Http\Controllers\IngredientController;
 use App\Http\Controllers\MealController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserProfileController;
@@ -47,6 +48,10 @@ Route::prefix('v1')->group(function () {
             Route::post('/', [MealController::class, 'store']);
             Route::post('/{meal}/confirm', [MealController::class, 'confirm']);
             Route::post('/{meal}/discard', [MealController::class, 'discard']);
+        });
+
+        Route::prefix('ingredients')->group(function () {
+            Route::get('/search', [IngredientController::class, 'search']);
         });
     });
 });
