@@ -16,6 +16,7 @@ class MealPostResource extends JsonResource
             'visibility'  => $this->visibility,
             'image_url'   => $this->image_url,
             'confirmed'   => $this->confirmed_at !== null,
+            'servings'    => $this->servings,
             'ingredients' => $this->ingredients->map(fn($ingredient) => [
                 'id'      => $ingredient->id,
                 'name_en' => $ingredient->name_en,

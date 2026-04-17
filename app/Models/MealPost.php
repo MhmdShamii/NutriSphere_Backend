@@ -18,6 +18,7 @@ class MealPost extends Model
         'visibility',
         'image_url',
         'confirmed_at',
+        'servings',
     ];
 
     protected $casts = [

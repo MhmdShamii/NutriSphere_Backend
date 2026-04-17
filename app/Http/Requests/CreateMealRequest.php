@@ -31,6 +31,7 @@ class CreateMealRequest extends FormRequest
             'ingredients.*.name'  => ['required', 'string', 'max:255'],
             'ingredients.*.portion' => ['required', 'numeric', 'min:0.1', 'max:10000'],
             'ingredients.*.unit'  => ['required', 'string', 'max:50'],
+            'servings'            => ['required', 'integer', 'min:1', 'max:100'],
             'preparation_steps'               => ['nullable', 'array', 'max:20'],
             'preparation_steps.*.description' => ['required_with:preparation_steps', 'string', 'max:1000'],
         ];

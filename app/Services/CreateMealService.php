@@ -83,6 +83,7 @@ class CreateMealService
             'name'            => $validated['name'],
             'description'     => $validated['description'] ?? null,
             'visibility'      => $validated['visibility'],
+            'servings'        => $validated['servings'],
             'image_url'       => $imageData['photo_url'],
             'confirmed_at'    => null,
         ]);
