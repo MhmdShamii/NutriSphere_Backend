@@ -16,6 +16,8 @@ class DailyLogingController extends Controller
 
     public function logMeal(MealPost $meal)
     {
+        abort_if($meal->confirmed_at === null, 422, 'Meal is not confirmed yet.');
+
         $log = $this->dailyLogingService->logMealFromPost($meal, Auth::user());
 
         return $this->success($log, 'Meal logged successfully.', "logged_meal", status: 201);

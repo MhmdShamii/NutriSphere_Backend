@@ -6,6 +6,7 @@ use App\Models\DailyLog;
 use App\Models\DailySummary;
 use App\Models\MealPost;
 use App\Models\User;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 
 class DailyLogingService
@@ -17,16 +18,7 @@ class DailyLogingService
 
             $profile = $user->profile;
 
-            $summary = DailySummary::firstOrCreate(
-                ['user_id' => $user->id, 'date' => $today],
-                [
-                    'calories_target' => $profile?->daily_calorie_target ?? 0,
-                    'protein_target'  => $profile?->daily_protein_g ?? 0,
-                    'carbs_target'    => $profile?->daily_carbs_g ?? 0,
-                    'fats_target'     => $profile?->daily_fat_g ?? 0,
-                    'fiber_target'    => 0,
-                ]
-            );
+            $summary = $this->findOrCreateSummary($user, $today, $profile);
 
             return $this->addLogedMealToDailyLog($mealPost, $user, $summary);
         });
@@ -68,6 +60,24 @@ class DailyLogingService
         $this->modifyDailySummary($summary, $log, isAdding: true);
 
         return $log;
+    }
+
+    private function findOrCreateSummary(User $user, string $date, $profile): DailySummary
+    {
+        try {
+            return DailySummary::firstOrCreate(
+                ['user_id' => $user->id, 'date' => $date],
+                [
+                    'calories_target' => $profile?->daily_calorie_target ?? 0,
+                    'protein_target'  => $profile?->daily_protein_g ?? 0,
+                    'carbs_target'    => $profile?->daily_carbs_g ?? 0,
+                    'fats_target'     => $profile?->daily_fat_g ?? 0,
+                    'fiber_target'    => 0,
+                ]
+            );
+        } catch (UniqueConstraintViolationException) {
+            return DailySummary::where('user_id', $user->id)->where('date', $date)->firstOrFail();
+        }
     }
 
     private function calculateForOnePortion(MealPost $mealPost): array
