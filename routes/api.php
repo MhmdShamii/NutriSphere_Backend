@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\DailyLogingController;
 use App\Http\Controllers\HealthConditionController;
 use App\Http\Controllers\IngredientController;
 use App\Http\Controllers\MealController;
@@ -42,6 +43,7 @@ Route::prefix('v1')->group(function () {
             Route::delete('/avatar', [UserController::class, 'destroyAvatar']);
             Route::post('/cover-image', [UserController::class, 'storeCoverImage']);
             Route::delete('/cover-image', [UserController::class, 'destroyCoverImage']);
+            Route::post('/log/{meal}', [DailyLogingController::class, 'logMeal']);
         });
 
         Route::prefix('meals')->group(function () {
