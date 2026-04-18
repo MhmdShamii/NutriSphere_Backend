@@ -229,10 +229,10 @@ class CreateMealService
 
     private function fuzzyCheckExistingIngredients(string $input): ?Ingredient
     {
-        $prefix = mb_substr($input, 0, 3);
+        $prefix = strtolower(mb_substr($input, 0, 3));
 
-        $candidates = Ingredient::where('name_en', 'LIKE', "{$prefix}%")
-            ->orWhere('name_ar', 'LIKE', "{$prefix}%")
+        $candidates = Ingredient::whereRaw('LOWER(name_en) LIKE ?', ["{$prefix}%"])
+            ->orWhereRaw('LOWER(name_ar) LIKE ?', ["{$prefix}%"])
             ->limit(self::FUZZY_CANDIDATES)
             ->get();
 

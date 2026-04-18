@@ -51,7 +51,7 @@ Route::prefix('v1')->group(function () {
         });
 
         Route::prefix('ingredients')->group(function () {
-            Route::get('/search', [IngredientController::class, 'search']);
+            Route::post('/search', [IngredientController::class, 'search']);
         });
     });
 });
