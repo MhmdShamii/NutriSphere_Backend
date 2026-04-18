@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Exception;
+use OpenAI\Exceptions\TransporterException;
 use OpenAI\Laravel\Facades\OpenAI;
 
 class OpenAiService
@@ -47,17 +48,15 @@ class OpenAiService
                 'max_tokens'  => 1000,
                 'messages'    => [['role' => "user", 'content' => $prompt]],
             ]);
-            $items = json_decode($response->choices[0]->message->content, true);
+            $items = json_decode($this->stripMarkdown($response->choices[0]->message->content), true);
 
             if (!is_array($items)) {
-                throw new \RuntimeException('Malformed JSON');
+                throw new Exception('Could not resolve one or more ingredients. Please check your input.');
             }
 
             return $items;
-        } catch (\Throwable) {
-            throw new Exception(
-                'Could not resolve one or more ingredients. Please check your input.'
-            );
+        } catch (TransporterException) {
+            throw new Exception('Nutrition service is temporarily unavailable. Please try again later.');
         }
     }
 
@@ -73,14 +72,17 @@ class OpenAiService
                 'max_tokens'  => 300,
                 'messages'    => [['role' => "user", 'content' => $prompt]],
             ]);
-            $data = json_decode($response->choices[0]->message->content, true);
+            $data = json_decode($this->stripMarkdown($response->choices[0]->message->content), true);
 
             return $this->isMacroValid($data) ? $data : null;
-        } catch (\Throwable) {
-            throw new Exception(
-                'Could not calculate macros. Please check your input.'
-            );
+        } catch (TransporterException) {
+            throw new Exception('Nutrition service is temporarily unavailable. Please try again later.');
         }
+    }
+
+    private function stripMarkdown(string $content): string
+    {
+        return preg_replace('/^```(?:json)?\s*([\s\S]*?)\s*```$/m', '$1', trim($content));
     }
 
     private function isMacroValid(?array $data): bool
