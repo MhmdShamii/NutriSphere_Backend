@@ -39,10 +39,12 @@ class MealConfirmationService
         }
 
         if ($meal->confirmed_at !== null) {
-            return ['error' => 'Cannot discard a confirmed meal', 'status' => 409];
+            $meal->ingredients()->detach();
+            $meal->preparationSteps()->delete();
+            $meal->delete();
+        } else {
+            $meal->forceDelete();
         }
-
-        $meal->delete();
 
         return ['meal_post_id' => $meal->id];
     }
