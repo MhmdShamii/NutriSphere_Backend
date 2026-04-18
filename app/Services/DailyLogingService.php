@@ -37,6 +37,11 @@ class DailyLogingService
         });
     }
 
+    public function logCustomMeal(User $user, array $validatedData)
+    {
+        dd($validatedData);
+    }
+
 
     public function addLogedMealToDailyLog(MealPost $mealPost, User $user, DailySummary $summary): DailyLog
     {

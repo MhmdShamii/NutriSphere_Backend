@@ -32,9 +32,10 @@ class DailyLogingController extends Controller
 
         return $this->success(null, 'Log removed successfully.');
     }
+
     public function logCustomMeal(CustomMealRequest $request)
     {
-        $log = $this->dailyLogingService->logCustomMeal(Auth::user());
+        $log = $this->dailyLogingService->logCustomMeal(Auth::user(), $request->validated());
 
         return $this->success($log, 'Custom meal logged successfully.', "logged_meal", status: 201);
     }
