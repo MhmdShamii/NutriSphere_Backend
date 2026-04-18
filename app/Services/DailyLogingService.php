@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\DailyLog;
 use App\Models\DailySummary;
+use App\Models\MealMacro;
 use App\Models\MealPost;
 use App\Models\User;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -11,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 
 class DailyLogingService
 {
+    public function __construct(private CalculateMacrosService $macrosService) {}
+
     public function logMealFromPost(MealPost $mealPost, User $user): DailyLog
     {
         return DB::transaction(function () use ($mealPost, $user) {
@@ -37,8 +40,21 @@ class DailyLogingService
         });
     }
 
+    public function logCustomMeal(User $user, array $validatedData): DailyLog
+    {
+        return DB::transaction(function () use ($user, $validatedData) {
+            [, $macros] = $this->macrosService->calculateMealMacrosPipeline($validatedData['ingredients']);
 
-    public function addLogedMealToDailyLog(MealPost $mealPost, User $user, DailySummary $summary): DailyLog
+            $summary = $this->findOrCreateSummary($user, now()->toDateString(), $user->profile);
+
+            return $this->logCustomMealToDailyLog(data_get($validatedData, 'name'), $macros, $user, $summary);
+        });
+    }
+
+
+    //helper functions
+
+    private function addLogedMealToDailyLog(MealPost $mealPost, User $user, DailySummary $summary): DailyLog
     {
         $portionMacros = $this->calculateForOnePortion($mealPost);
 
@@ -112,5 +128,27 @@ class DailyLogingService
             $summary->decrement('fiber_consumed', $log->fiber);
             $summary->decrement('logs_count', 1);
         }
+    }
+
+    private function logCustomMealToDailyLog(?string $name, MealMacro $macros, User $user, DailySummary $summary): DailyLog
+    {
+        $log = DailyLog::create([
+            'user_id'          => $user->id,
+            'daily_summary_id' => $summary->id,
+            'logged_at'        => now(),
+            'type'             => 'custom',
+            'meal_post_id'     => null,
+            'log_name'         => $name,
+            'fingerprint'      => $macros->fingerprint,
+            'calories'         => $macros->calories,
+            'protein'          => $macros->protein,
+            'carbs'            => $macros->carbs,
+            'fats'             => $macros->fats,
+            'fiber'            => $macros->fiber,
+        ]);
+
+        $this->modifyDailySummary($summary, $log, isAdding: true);
+
+        return $log;
     }
 }

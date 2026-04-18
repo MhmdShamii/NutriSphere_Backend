@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CustomMealRequest;
 use App\Http\Responses\ApiResponse;
 use App\Models\DailyLog;
 use App\Models\MealPost;
@@ -30,5 +31,12 @@ class DailyLogingController extends Controller
         $this->dailyLogingService->removeLogFromDailySummary($log);
 
         return $this->success(null, 'Log removed successfully.');
+    }
+
+    public function logCustomMeal(CustomMealRequest $request)
+    {
+        $log = $this->dailyLogingService->logCustomMeal(Auth::user(), $request->validated());
+
+        return $this->success($log, 'Custom meal logged successfully.', "logged_meal", status: 201);
     }
 }
