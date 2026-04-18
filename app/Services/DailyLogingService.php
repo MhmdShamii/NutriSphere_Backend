@@ -32,6 +32,20 @@ class DailyLogingService
         });
     }
 
+    public function removeLogFromDailySummary(DailyLog $log): void
+    {
+        DB::transaction(function () use ($log) {
+            $summary = $log->dailySummary;
+
+            if ($summary) {
+                $this->modifyDailySummary($summary, $log, isAdding: false);
+            }
+
+            $log->delete();
+        });
+    }
+
+
     public function addLogedMealToDailyLog(MealPost $mealPost, User $user, DailySummary $summary): DailyLog
     {
         $portionMacros = $this->calculateForOnePortion($mealPost);

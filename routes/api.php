@@ -44,6 +44,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/cover-image', [UserController::class, 'storeCoverImage']);
             Route::delete('/cover-image', [UserController::class, 'destroyCoverImage']);
             Route::post('/log/{meal}', [DailyLogingController::class, 'logMeal']);
+            Route::delete('/log/{log}', [DailyLogingController::class, 'removeDailyLog']);
         });
 
         Route::prefix('meals')->group(function () {
