@@ -17,13 +17,9 @@ class DailyLogingService
     public function logMealFromPost(MealPost $mealPost, User $user): DailyLog
     {
         return DB::transaction(function () use ($mealPost, $user) {
-            $today = now()->toDateString();
+            $summary = $this->findOrCreateSummary($user, now()->toDateString(), $user->profile);
 
-            $profile = $user->profile;
-
-            $summary = $this->findOrCreateSummary($user, $today, $profile);
-
-            return $this->addLogedMealToDailyLog($mealPost, $user, $summary);
+            return $this->createLog($user, $summary, $this->calculateForOnePortion($mealPost), $mealPost->name, null, 'meal', $mealPost->id);
         });
     }
 
@@ -47,36 +43,28 @@ class DailyLogingService
 
             $summary = $this->findOrCreateSummary($user, now()->toDateString(), $user->profile);
 
-            return $this->logCustomMealToDailyLog(data_get($validatedData, 'name'), $macros, $user, $summary);
+            return $this->createLog($user, $summary, $this->macroToArray($macros), data_get($validatedData, 'name'), null, 'custom');
         });
     }
 
-
-    //helper functions
-
-    private function addLogedMealToDailyLog(MealPost $mealPost, User $user, DailySummary $summary): DailyLog
+    public function logEstimatedMeal(User $user, array $validatedData): DailyLog
     {
-        $portionMacros = $this->calculateForOnePortion($mealPost);
+        return DB::transaction(function () use ($user, $validatedData) {
+            $country = $user->load('country')->country;
 
-        $log = DailyLog::create([
-            'user_id'          => $user->id,
-            'daily_summary_id' => $summary->id,
-            'logged_at'        => now(),
-            'type'             => 'meal',
-            'meal_post_id'     => $mealPost->id,
-            'log_name'         => $mealPost->name,
-            'fingerprint'      => $mealPost->fingerprint,
-            'calories'         => $portionMacros['calories'],
-            'protein'          => $portionMacros['protein'],
-            'carbs'            => $portionMacros['carbs'],
-            'fats'             => $portionMacros['fats'],
-            'fiber'            => $portionMacros['fiber'],
-        ]);
+            $macros = $this->macrosService->estimateMacrosPipeline(
+                $validatedData['name'],
+                data_get($validatedData, 'description'),
+                $country?->name ?? 'Unknown',
+            );
 
-        $this->modifyDailySummary($summary, $log, isAdding: true);
+            $summary = $this->findOrCreateSummary($user, now()->toDateString(), $user->profile);
 
-        return $log;
+            return $this->createLog($user, $summary, $this->macroToArray($macros), data_get($validatedData, 'name'), data_get($validatedData, 'description'), 'estimate');
+        });
     }
+
+    // helper functions
 
     private function findOrCreateSummary(User $user, string $date, $profile): DailySummary
     {
@@ -110,9 +98,41 @@ class DailyLogingService
         ];
     }
 
+    private function macroToArray(MealMacro $macro): array
+    {
+        return [
+            'calories' => $macro->calories,
+            'protein'  => $macro->protein,
+            'carbs'    => $macro->carbs,
+            'fats'     => $macro->fats,
+            'fiber'    => $macro->fiber,
+        ];
+    }
+
+    private function createLog(User $user, DailySummary $summary, array $macros, ?string $name, ?string $description, string $type, ?int $mealPostId = null): DailyLog
+    {
+        $log = DailyLog::create([
+            'user_id'          => $user->id,
+            'daily_summary_id' => $summary->id,
+            'logged_at'        => now(),
+            'type'             => $type,
+            'meal_post_id'     => $mealPostId,
+            'log_name'         => $name,
+            'description'      => $description,
+            'calories'         => $macros['calories'],
+            'protein'          => $macros['protein'],
+            'carbs'            => $macros['carbs'],
+            'fats'             => $macros['fats'],
+            'fiber'            => $macros['fiber'],
+        ]);
+
+        $this->modifyDailySummary($summary, $log, isAdding: true);
+
+        return $log;
+    }
+
     private function modifyDailySummary(DailySummary $summary, DailyLog $log, bool $isAdding = true): void
     {
-
         if ($isAdding) {
             $summary->increment('calories_consumed', $log->calories);
             $summary->increment('protein_consumed', $log->protein);
@@ -121,34 +141,12 @@ class DailyLogingService
             $summary->increment('fiber_consumed', $log->fiber);
             $summary->increment('logs_count', 1);
         } else {
-            $summary->decrement('calories_consumed',  $log->calories);
+            $summary->decrement('calories_consumed', $log->calories);
             $summary->decrement('protein_consumed', $log->protein);
             $summary->decrement('carbs_consumed', $log->carbs);
             $summary->decrement('fats_consumed', $log->fats);
             $summary->decrement('fiber_consumed', $log->fiber);
             $summary->decrement('logs_count', 1);
         }
-    }
-
-    private function logCustomMealToDailyLog(?string $name, MealMacro $macros, User $user, DailySummary $summary): DailyLog
-    {
-        $log = DailyLog::create([
-            'user_id'          => $user->id,
-            'daily_summary_id' => $summary->id,
-            'logged_at'        => now(),
-            'type'             => 'custom',
-            'meal_post_id'     => null,
-            'log_name'         => $name,
-            'fingerprint'      => $macros->fingerprint,
-            'calories'         => $macros->calories,
-            'protein'          => $macros->protein,
-            'carbs'            => $macros->carbs,
-            'fats'             => $macros->fats,
-            'fiber'            => $macros->fiber,
-        ]);
-
-        $this->modifyDailySummary($summary, $log, isAdding: true);
-
-        return $log;
     }
 }

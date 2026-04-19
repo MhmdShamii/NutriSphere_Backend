@@ -9,7 +9,6 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserProfileController;
 use Illuminate\Support\Facades\Route;
 
-
 Route::prefix('v1')->group(function () {
 
     Route::prefix('auth')->group(function () {
@@ -43,8 +42,9 @@ Route::prefix('v1')->group(function () {
             Route::delete('/avatar', [UserController::class, 'destroyAvatar']);
             Route::post('/cover-image', [UserController::class, 'storeCoverImage']);
             Route::delete('/cover-image', [UserController::class, 'destroyCoverImage']);
-            Route::post('/log/{meal}', [DailyLogingController::class, 'logMeal']);
             Route::post('/log', [DailyLogingController::class, 'logCustomMeal']);
+            Route::post('/log/estimate', [DailyLogingController::class, 'LogEstimatedMeal']);
+            Route::post('/log/{meal}', [DailyLogingController::class, 'logMeal']);
             Route::delete('/log/{log}', [DailyLogingController::class, 'removeDailyLog']);
         });
 

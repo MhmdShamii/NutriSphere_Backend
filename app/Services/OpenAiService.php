@@ -19,6 +19,27 @@ class OpenAiService
         Ingredients: %s
         PROMPT;
 
+    private $estimateMealPrompt = <<<PROMPT
+        You are a professional nutritionist with deep expertise in regional and international cuisines.
+        Estimate the macronutrients for a TYPICAL SINGLE SERVING of the meal described below.
+        Use the country/region to interpret traditional preparation methods, common ingredients, and standard portion sizes.
+        If a description is provided, use it to refine your estimate as much as possible.
+
+        Meal Name: %s
+        Country/Region: %s
+        Description: %s
+
+        Respond ONLY with valid JSON. No explanation. No markdown.
+        {
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fats": 0,
+            "fiber": 0
+        }
+        All values must be positive numbers rounded to 2 decimal places.
+        PROMPT;
+
     private $calculateMacrosPrompt = <<<PROMPT
         You are a nutrition calculator.
         Calculate the total nutritional values for this entire meal.
@@ -60,6 +81,26 @@ class OpenAiService
         }
     }
 
+
+    public function estimateMealMacros(string $name, ?string $description, string $country): ?array
+    {
+        $prompt = sprintf($this->estimateMealPrompt, $name, $country, $description ?? 'No description provided.');
+
+        try {
+            $response = OpenAI::chat()->create([
+                'model'       => env('OPENAI_MODEL_STAGE2'),
+                'temperature' => 0,
+                'max_tokens'  => 300,
+                'messages'    => [['role' => 'user', 'content' => $prompt]],
+            ]);
+
+            $data = json_decode($this->stripMarkdown($response->choices[0]->message->content), true);
+
+            return $this->isMacroValid($data) ? $data : null;
+        } catch (TransporterException) {
+            throw new Exception('Nutrition service is temporarily unavailable. Please try again later.');
+        }
+    }
 
     public function calculateMacros(string $ingredientList): ?array
     {
