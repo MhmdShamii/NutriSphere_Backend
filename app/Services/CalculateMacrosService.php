@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\IngredientSource;
 use App\Models\Ingredient;
 use App\Models\MealMacro;
 use Exception;
@@ -151,7 +152,7 @@ class CalculateMacrosService
                 $match = Ingredient::create([
                     'name_en'  => $nameEn,
                     'name_ar'  => data_get($item, 'name_ar'),
-                    'source'   => 'user',
+                    'source'   => IngredientSource::USER,
                     'verified' => false,
                 ]);
             }

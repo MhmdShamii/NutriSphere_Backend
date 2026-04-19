@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\DailyLogType;
 use App\Models\DailyLog;
 use App\Models\DailySummary;
 use App\Models\MealMacro;
@@ -19,7 +20,7 @@ class DailyLogingService
         return DB::transaction(function () use ($mealPost, $user) {
             $summary = $this->findOrCreateSummary($user, now()->toDateString(), $user->profile);
 
-            return $this->createLog($user, $summary, $this->calculateForOnePortion($mealPost), $mealPost->name, null, 'meal', $mealPost->id);
+            return $this->createLog($user, $summary, $this->calculateForOnePortion($mealPost), $mealPost->name, null, DailyLogType::MEAL, $mealPost->id);
         });
     }
 
@@ -43,7 +44,7 @@ class DailyLogingService
 
             $summary = $this->findOrCreateSummary($user, now()->toDateString(), $user->profile);
 
-            return $this->createLog($user, $summary, $this->macroToArray($macros), data_get($validatedData, 'name'), null, 'custom');
+            return $this->createLog($user, $summary, $this->macroToArray($macros), data_get($validatedData, 'name'), null, DailyLogType::CUSTOM);
         });
     }
 
@@ -60,7 +61,7 @@ class DailyLogingService
 
             $summary = $this->findOrCreateSummary($user, now()->toDateString(), $user->profile);
 
-            return $this->createLog($user, $summary, $this->macroToArray($macros), data_get($validatedData, 'name'), data_get($validatedData, 'description'), 'estimate');
+            return $this->createLog($user, $summary, $this->macroToArray($macros), data_get($validatedData, 'name'), data_get($validatedData, 'description'), DailyLogType::ESTIMATE);
         });
     }
 
@@ -109,7 +110,7 @@ class DailyLogingService
         ];
     }
 
-    private function createLog(User $user, DailySummary $summary, array $macros, ?string $name, ?string $description, string $type, ?int $mealPostId = null): DailyLog
+    private function createLog(User $user, DailySummary $summary, array $macros, ?string $name, ?string $description, DailyLogType $type, ?int $mealPostId = null): DailyLog
     {
         $log = DailyLog::create([
             'user_id'          => $user->id,

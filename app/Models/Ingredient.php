@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\IngredientSource;
 use Illuminate\Database\Eloquent\Model;
 
 class Ingredient extends Model
@@ -14,6 +15,7 @@ class Ingredient extends Model
     ];
 
     protected $casts = [
+        'source'  => IngredientSource::class,
         'verified' => 'boolean',
     ];
 

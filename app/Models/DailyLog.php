@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\DailyLogType;
 use Illuminate\Database\Eloquent\Model;
 
 class DailyLog extends Model
@@ -24,6 +25,7 @@ class DailyLog extends Model
 
     protected $casts = [
         'logged_at' => 'datetime',
+        'type'      => DailyLogType::class,
         'calories'  => 'decimal:2',
         'protein'   => 'decimal:2',
         'carbs'     => 'decimal:2',
