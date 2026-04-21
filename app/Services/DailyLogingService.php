@@ -41,6 +41,8 @@ class DailyLogingService
     public function logCustomMeal(User $user, array $validatedData): DailyLog
     {
         return DB::transaction(function () use ($user, $validatedData) {
+            $this->discardExistingDraft($user, DailyLogType::CUSTOM);
+
             [, $macros] = $this->macrosService->calculateMealMacrosPipeline($validatedData['ingredients']);
 
             $summary = $this->findOrCreateSummary($user, now()->toDateString(), $user->profile);
@@ -52,6 +54,8 @@ class DailyLogingService
     public function logEstimatedMeal(User $user, array $validatedData): DailyLog
     {
         return DB::transaction(function () use ($user, $validatedData) {
+            $this->discardExistingDraft($user, DailyLogType::ESTIMATE);
+
             $country = $user->load('country')->country;
 
             $macros = $this->macrosService->estimateMacrosPipeline(
@@ -161,6 +165,14 @@ class DailyLogingService
             'fats'             => $macros['fats'],
             'fiber'            => $macros['fiber'],
         ]);
+    }
+
+    private function discardExistingDraft(User $user, DailyLogType $type): void
+    {
+        DailyLog::where('user_id', $user->id)
+            ->where('type', $type)
+            ->whereNull('confirmed_at')
+            ->delete();
     }
 
     private function modifyDailySummary(DailySummary $summary, DailyLog $log, bool $isAdding = true): void

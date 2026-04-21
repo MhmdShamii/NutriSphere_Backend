@@ -16,6 +16,10 @@ class CreateMealService
     public function create(UserProfile $profile, array $validated): MealPost
     {
         return DB::transaction(function () use ($profile, $validated) {
+            MealPost::where('user_profile_id', $profile->id)
+                ->whereNull('confirmed_at')
+                ->each(fn(MealPost $draft) => $draft->forceDelete());
+
             [$resolvedIngredients, $macros] = $this->macrosService->calculateMealMacrosPipeline($validated['ingredients']);
 
             return $this->persistMeal($profile, $validated, $resolvedIngredients, $macros);
