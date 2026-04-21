@@ -45,7 +45,7 @@ class DailyLogingService
 
             $summary = $this->findOrCreateSummary($user, now()->toDateString(), $user->profile);
 
-            return $this->createPendingLog($user, $summary, $this->macroToArray($macros), data_get($validatedData, 'name'), null, DailyLogType::CUSTOM);
+            return $this->createPendingLog($user, $summary, $this->macroToArray($macros), data_get($validatedData, 'name'), data_get($validatedData, 'description'), DailyLogType::CUSTOM);
         });
     }
 
