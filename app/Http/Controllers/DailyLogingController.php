@@ -27,8 +27,6 @@ class DailyLogingController extends Controller
 
     public function removeDailyLog(DailyLog $log)
     {
-        $log = Auth::user()->dailyLogs()->findOrFail($log->id);
-
         $this->dailyLogingService->removeLogFromDailySummary($log);
 
         return $this->success(null, 'Log removed successfully.');

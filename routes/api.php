@@ -45,14 +45,15 @@ Route::prefix('v1')->group(function () {
             Route::post('/log', [DailyLogingController::class, 'logCustomMeal']);
             Route::post('/log/estimate', [DailyLogingController::class, 'LogEstimatedMeal']);
             Route::post('/log/{meal}', [DailyLogingController::class, 'logMeal']);
-            Route::delete('/log/{log}', [DailyLogingController::class, 'removeDailyLog']);
+            Route::delete('/log/{log}', [DailyLogingController::class, 'removeDailyLog'])->middleware('ensure.owns:log');
         });
 
         Route::prefix('meals')->group(function () {
             Route::post('/', [MealController::class, 'store']);
-            Route::post('/{meal}/confirm', [MealController::class, 'confirm']);
-            Route::post('/{meal}/discard', [MealController::class, 'discard']);
+            Route::post('/{meal}/confirm', [MealController::class, 'confirm'])->middleware('ensure.owns:meal,user_profile_id');
+            Route::post('/{meal}/discard', [MealController::class, 'discard'])->middleware('ensure.owns:meal,user_profile_id');
         });
+
 
         Route::prefix('ingredients')->group(function () {
             Route::post('/search', [IngredientController::class, 'search']);
