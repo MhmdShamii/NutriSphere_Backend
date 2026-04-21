@@ -11,6 +11,7 @@ class DailyLog extends Model
         'user_id',
         'daily_summary_id',
         'logged_at',
+        'confirmed_at',
         'type',
         'meal_post_id',
         'log_name',
@@ -24,8 +25,9 @@ class DailyLog extends Model
     ];
 
     protected $casts = [
-        'logged_at' => 'datetime',
-        'type'      => DailyLogType::class,
+        'logged_at'    => 'datetime',
+        'confirmed_at' => 'datetime',
+        'type'         => DailyLogType::class,
         'calories'  => 'decimal:2',
         'protein'   => 'decimal:2',
         'carbs'     => 'decimal:2',

@@ -27,10 +27,11 @@ class DailyLogingService
     public function removeLogFromDailySummary(DailyLog $log): void
     {
         DB::transaction(function () use ($log) {
-            $summary = $log->dailySummary;
-
-            if ($summary) {
-                $this->modifyDailySummary($summary, $log, isAdding: false);
+            if ($log->confirmed_at !== null) {
+                $summary = $log->dailySummary;
+                if ($summary) {
+                    $this->modifyDailySummary($summary, $log, isAdding: false);
+                }
             }
 
             $log->delete();
@@ -44,7 +45,7 @@ class DailyLogingService
 
             $summary = $this->findOrCreateSummary($user, now()->toDateString(), $user->profile);
 
-            return $this->createLog($user, $summary, $this->macroToArray($macros), data_get($validatedData, 'name'), null, DailyLogType::CUSTOM);
+            return $this->createPendingLog($user, $summary, $this->macroToArray($macros), data_get($validatedData, 'name'), null, DailyLogType::CUSTOM);
         });
     }
 
@@ -61,7 +62,18 @@ class DailyLogingService
 
             $summary = $this->findOrCreateSummary($user, now()->toDateString(), $user->profile);
 
-            return $this->createLog($user, $summary, $this->macroToArray($macros), data_get($validatedData, 'name'), data_get($validatedData, 'description'), DailyLogType::ESTIMATE);
+            return $this->createPendingLog($user, $summary, $this->macroToArray($macros), data_get($validatedData, 'name'), data_get($validatedData, 'description'), DailyLogType::ESTIMATE);
+        });
+    }
+
+    public function confirmPendingLog(DailyLog $log): DailyLog
+    {
+        return DB::transaction(function () use ($log) {
+            $log->update(['confirmed_at' => now()]);
+
+            $this->modifyDailySummary($log->dailySummary, $log, isAdding: true);
+
+            return $log;
         });
     }
 
@@ -116,6 +128,7 @@ class DailyLogingService
             'user_id'          => $user->id,
             'daily_summary_id' => $summary->id,
             'logged_at'        => now(),
+            'confirmed_at'     => now(),
             'type'             => $type,
             'meal_post_id'     => $mealPostId,
             'log_name'         => $name,
@@ -130,6 +143,24 @@ class DailyLogingService
         $this->modifyDailySummary($summary, $log, isAdding: true);
 
         return $log;
+    }
+
+    private function createPendingLog(User $user, DailySummary $summary, array $macros, ?string $name, ?string $description, DailyLogType $type): DailyLog
+    {
+        return DailyLog::create([
+            'user_id'          => $user->id,
+            'daily_summary_id' => $summary->id,
+            'logged_at'        => now(),
+            'confirmed_at'     => null,
+            'type'             => $type,
+            'log_name'         => $name,
+            'description'      => $description,
+            'calories'         => $macros['calories'],
+            'protein'          => $macros['protein'],
+            'carbs'            => $macros['carbs'],
+            'fats'             => $macros['fats'],
+            'fiber'            => $macros['fiber'],
+        ]);
     }
 
     private function modifyDailySummary(DailySummary $summary, DailyLog $log, bool $isAdding = true): void
