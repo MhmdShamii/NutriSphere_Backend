@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\MealVisibility;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -24,6 +25,7 @@ class MealPost extends Model
     protected $casts = [
         'confirmed_at' => 'datetime',
         'servings'     => 'integer',
+        'visibility'   => MealVisibility::class,
     ];
 
     // Relations

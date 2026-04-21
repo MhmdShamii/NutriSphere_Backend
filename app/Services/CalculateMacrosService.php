@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\IngredientSource;
 use App\Models\Ingredient;
 use App\Models\MealMacro;
 use Exception;
@@ -47,6 +48,23 @@ class CalculateMacrosService
     ];
 
     public function __construct(private OpenAiService $openAi) {}
+
+    public function estimateMacrosPipeline(string $name, ?string $description, string $country): MealMacro
+    {
+        $data = $this->openAi->estimateMealMacros($name, $description, $country);
+
+        if ($data === null) {
+            throw new Exception('Could not estimate nutrition data. Please try again.');
+        }
+
+        return new MealMacro([
+            'calories' => $data['calories'],
+            'protein'  => $data['protein'],
+            'carbs'    => $data['carbs'],
+            'fats'     => $data['fats'],
+            'fiber'    => $data['fiber'],
+        ]);
+    }
 
     public function calculateMealMacrosPipeline(array $ingredients): array
     {
@@ -134,7 +152,7 @@ class CalculateMacrosService
                 $match = Ingredient::create([
                     'name_en'  => $nameEn,
                     'name_ar'  => data_get($item, 'name_ar'),
-                    'source'   => 'user',
+                    'source'   => IngredientSource::USER,
                     'verified' => false,
                 ]);
             }

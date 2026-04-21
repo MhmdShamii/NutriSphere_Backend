@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CustomMealRequest;
+use App\Http\Requests\EstimateMealRequest;
 use App\Http\Responses\ApiResponse;
 use App\Models\DailyLog;
 use App\Models\MealPost;
@@ -26,8 +27,6 @@ class DailyLogingController extends Controller
 
     public function removeDailyLog(DailyLog $log)
     {
-        $log = Auth::user()->dailyLogs()->findOrFail($log->id);
-
         $this->dailyLogingService->removeLogFromDailySummary($log);
 
         return $this->success(null, 'Log removed successfully.');
@@ -38,5 +37,12 @@ class DailyLogingController extends Controller
         $log = $this->dailyLogingService->logCustomMeal(Auth::user(), $request->validated());
 
         return $this->success($log, 'Custom meal logged successfully.', "logged_meal", status: 201);
+    }
+
+    public function LogEstimatedMeal(EstimateMealRequest $request)
+    {
+        $log = $this->dailyLogingService->logEstimatedMeal(Auth::user(), $request->validated());
+
+        return $this->success($log, 'Estimated meal logged successfully.', "logged_meal", status: 201);
     }
 }

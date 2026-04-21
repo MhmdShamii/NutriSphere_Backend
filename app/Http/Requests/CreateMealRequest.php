@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\MealVisibility;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Enum;
 
 class CreateMealRequest extends FormRequest
 {
@@ -19,7 +21,7 @@ class CreateMealRequest extends FormRequest
         return [
             'name'                            => 'required|string|max:255',
             'description'                     => 'nullable|string|max:1000',
-            'visibility'                      => 'required|in:public,private',
+            'visibility'                      => ['required', new Enum(MealVisibility::class)],
             'servings'                        => 'required|integer|min:1|max:100',
             'ingredients'                     => 'required|array|min:1|max:20',
             'ingredients.*.name'              => 'required|string|max:255',
