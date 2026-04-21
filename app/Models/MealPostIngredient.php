@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\MeasurementUnit;
 use Illuminate\Database\Eloquent\Model;
 
 class MealPostIngredient extends Model
@@ -20,5 +21,9 @@ class MealPostIngredient extends Model
         'ingredient_id',
         'portion',
         'unit',
+    ];
+
+    protected $casts = [
+        'unit' => MeasurementUnit::class,
     ];
 }

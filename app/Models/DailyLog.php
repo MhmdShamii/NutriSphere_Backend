@@ -1,0 +1,52 @@
+<?php
+
+namespace App\Models;
+
+use App\Enums\DailyLogType;
+use Illuminate\Database\Eloquent\Model;
+
+class DailyLog extends Model
+{
+    protected $fillable = [
+        'user_id',
+        'daily_summary_id',
+        'logged_at',
+        'confirmed_at',
+        'type',
+        'meal_post_id',
+        'log_name',
+        'fingerprint',
+        'description',
+        'calories',
+        'protein',
+        'carbs',
+        'fats',
+        'fiber',
+    ];
+
+    protected $casts = [
+        'logged_at'    => 'datetime',
+        'confirmed_at' => 'datetime',
+        'type'         => DailyLogType::class,
+        'calories'  => 'decimal:2',
+        'protein'   => 'decimal:2',
+        'carbs'     => 'decimal:2',
+        'fats'      => 'decimal:2',
+        'fiber'     => 'decimal:2',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function dailySummary()
+    {
+        return $this->belongsTo(DailySummary::class);
+    }
+
+    public function mealPost()
+    {
+        return $this->belongsTo(MealPost::class);
+    }
+}

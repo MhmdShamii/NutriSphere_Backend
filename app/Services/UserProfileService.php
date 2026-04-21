@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\UserActivityLevels;
+use App\Enums\UserGender;
 use App\Enums\UserGoal;
 use App\Enums\UserOnboardingSteps;
 use App\Models\UserProfile;
@@ -83,7 +84,7 @@ class UserProfileService
         $bmr = (10 * $profile->weight_kg)
             + (6.25 * $profile->height_cm)
             - (5 * $age)
-            + ($profile->gender === 'male' ? 5 : -161);
+            + ($profile->gender === UserGender::MALE ? 5 : -161);
 
         $tdee = $bmr * $this->activityMultiplier($profile->activity_level);
 

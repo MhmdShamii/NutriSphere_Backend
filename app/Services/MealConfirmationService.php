@@ -11,10 +11,6 @@ class MealConfirmationService
 {
     public function confirm(MealPost $meal, UserProfile $profile, UploadedFile $image): MealPost|array
     {
-        if ($meal->user_profile_id !== $profile->id) {
-            return ['error' => 'Forbidden', 'status' => 403];
-        }
-
         if ($meal->confirmed_at !== null) {
             return ['error' => 'Meal is already confirmed', 'status' => 409];
         }
@@ -34,10 +30,6 @@ class MealConfirmationService
 
     public function discard(MealPost $meal, UserProfile $profile): array
     {
-        if ($meal->user_profile_id !== $profile->id) {
-            return ['error' => 'Forbidden', 'status' => 403];
-        }
-
         if ($meal->confirmed_at !== null) {
             $meal->ingredients()->detach();
             $meal->preparationSteps()->delete();

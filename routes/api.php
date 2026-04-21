@@ -1,13 +1,13 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\DailyLogingController;
 use App\Http\Controllers\HealthConditionController;
 use App\Http\Controllers\IngredientController;
 use App\Http\Controllers\MealController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserProfileController;
 use Illuminate\Support\Facades\Route;
-
 
 Route::prefix('v1')->group(function () {
 
@@ -42,13 +42,19 @@ Route::prefix('v1')->group(function () {
             Route::delete('/avatar', [UserController::class, 'destroyAvatar']);
             Route::post('/cover-image', [UserController::class, 'storeCoverImage']);
             Route::delete('/cover-image', [UserController::class, 'destroyCoverImage']);
+            Route::post('/log', [DailyLogingController::class, 'logCustomMeal']);
+            Route::post('/log/estimate', [DailyLogingController::class, 'logEstimatedMeal']);
+            Route::post('/log/{log}/confirm', [DailyLogingController::class, 'confirmLog'])->middleware('ensure.owns:log');
+            Route::post('/log/{meal}', [DailyLogingController::class, 'logMeal']);
+            Route::delete('/log/{log}', [DailyLogingController::class, 'removeDailyLog'])->middleware('ensure.owns:log');
         });
 
         Route::prefix('meals')->group(function () {
             Route::post('/', [MealController::class, 'store']);
-            Route::post('/{meal}/confirm', [MealController::class, 'confirm']);
-            Route::post('/{meal}/discard', [MealController::class, 'discard']);
+            Route::post('/{meal}/confirm', [MealController::class, 'confirm'])->middleware('ensure.owns:meal,user_profile_id');
+            Route::post('/{meal}/discard', [MealController::class, 'discard'])->middleware('ensure.owns:meal,user_profile_id');
         });
+
 
         Route::prefix('ingredients')->group(function () {
             Route::post('/search', [IngredientController::class, 'search']);
