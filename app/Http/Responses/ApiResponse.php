@@ -15,9 +15,9 @@ trait ApiResponse
         ], $status);
     }
 
-    protected function successResource(ResourceCollection $userResource, string $message = 'OK', int $status = 200): ResourceCollection
+    protected function successResource(ResourceCollection $resource, string $message = 'OK', int $status = 200): ResourceCollection
     {
-        return $userResource->additional([
+        return $resource->additional([
             'message' => $message,
             'status' => $status
         ]);

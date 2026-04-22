@@ -19,7 +19,7 @@ class MealController extends Controller
     use ApiResponse;
 
     public function __construct(
-        private CreateMealService $CreateMealService,
+        private CreateMealService $createMealService,
         private MealConfirmationService $mealConfirmationService,
         private HealthWarningService $healthWarningService,
     ) {}
@@ -27,7 +27,7 @@ class MealController extends Controller
     public function store(CreateMealRequest $request): JsonResponse
     {
         $user     = Auth::user();
-        $mealPost = $this->CreateMealService->create($user->profile, $request->validated());
+        $mealPost = $this->createMealService->create($user->profile, $request->validated());
         $warning  = $this->healthWarningService->fromMealPost($user, $mealPost);
 
         return $this->success(new MealPostResponseResource($mealPost, $warning), 'Review your meal before confirming', 'data', 202);

@@ -191,6 +191,7 @@ PROMPT;
         try {
             $response = OpenAI::chat()->create([
                 'model'                 => env('OPENAI_ESTIMATION_MODEL'),
+                'temperature'           => 0,
                 'max_completion_tokens' => 500,
                 'messages'              => [['role' => 'user', 'content' => $prompt]],
             ]);
