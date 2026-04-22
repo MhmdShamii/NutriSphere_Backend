@@ -97,17 +97,20 @@ Meal ingredients:
 %s
 
 Rules:
-1. Only flag ingredients with a genuine clinically relevant 
-   concern for the specific condition listed.
-2. Do not over-flag — black pepper for hypertension is not 
-   a concern worth flagging.
-3. Focus on significant interactions — high sugar for diabetes,
-   high sodium for hypertension, gluten for celiac, 
-   lactose for lactose intolerance, high potassium for 
-   kidney disease.
-4. Be specific — name the exact ingredient and why it is 
-   a concern for the exact condition.
-5. If no genuine concern exists return is_flagged as false
+1. Only flag ingredients that pose a genuine, clinically
+   significant risk for the specific condition listed.
+2. Before flagging, calculate the actual content from the
+   given portion and compare it to these minimum thresholds —
+   only flag if the threshold is exceeded:
+   - Hypertension: sodium > 600mg (salt > 1.5g per serving)
+   - Diabetes: added sugar > 10g per serving
+   - Heart disease: saturated fat > 5g per serving
+   - Kidney disease: potassium > 500mg per serving
+   - Celiac / gluten intolerance: any amount of gluten
+   - Allergies: any amount of the allergen
+3. Be specific — name the exact ingredient, the calculated
+   amount, and why it exceeds the threshold for the condition.
+4. If no threshold is exceeded return is_flagged as false
    with an empty flagged_ingredients array.
 
 Respond ONLY with valid JSON. No explanation. No markdown.
