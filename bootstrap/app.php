@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureMealIsLoggable;
 use App\Http\Middleware\EnsureOnboardingStep;
 use App\Http\Middleware\EnsureOwnership;
 use Illuminate\Foundation\Application;
@@ -15,8 +16,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'ensure.step' => EnsureOnboardingStep::class,
-            'ensure.owns' => EnsureOwnership::class,
+            'ensure.step'   => EnsureOnboardingStep::class,
+            'ensure.owns'   => EnsureOwnership::class,
+            'meal.loggable' => EnsureMealIsLoggable::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {})->create();

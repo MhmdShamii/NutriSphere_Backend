@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ConfirmMealRequest;
 use App\Http\Requests\CreateMealRequest;
 use App\Http\Resources\MealPostResource;
+use App\Http\Resources\MealPostResponseResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\MealPost;
+use Illuminate\Support\Facades\Auth;
 use App\Services\CreateMealService;
+use App\Services\HealthWarningService;
 use App\Services\MealConfirmationService;
 use Illuminate\Http\JsonResponse;
 
@@ -16,22 +19,23 @@ class MealController extends Controller
     use ApiResponse;
 
     public function __construct(
-        private CreateMealService $CreateMealService,
+        private CreateMealService $createMealService,
         private MealConfirmationService $mealConfirmationService,
+        private HealthWarningService $healthWarningService,
     ) {}
 
     public function store(CreateMealRequest $request): JsonResponse
     {
-        $profile = auth()->user()->profile;
+        $user     = Auth::user();
+        $mealPost = $this->createMealService->create($user->profile, $request->validated());
+        $warning  = $this->healthWarningService->fromMealPost($user, $mealPost);
 
-        $mealPost = $this->CreateMealService->create($profile, $request->validated());
-
-        return $this->success(new MealPostResource($mealPost), "Review your meal before confirming", "meal", 202);
+        return $this->success(new MealPostResponseResource($mealPost, $warning), 'Review your meal before confirming', 'data', 202);
     }
 
     public function confirm(ConfirmMealRequest $request, MealPost $meal): JsonResponse
     {
-        $result = $this->mealConfirmationService->confirm($meal, auth()->user()->profile, $request->file('image'));
+        $result = $this->mealConfirmationService->confirm($meal, Auth::user()->profile, $request->file('image'));
 
         if (is_array($result) && isset($result['error'])) {
             return $this->error($result['error'], $result['status']);
@@ -42,7 +46,7 @@ class MealController extends Controller
 
     public function discard(MealPost $meal): JsonResponse
     {
-        $result = $this->mealConfirmationService->discard($meal, auth()->user()->profile);
+        $result = $this->mealConfirmationService->discard($meal, Auth::user()->profile);
 
         if (isset($result['error'])) {
             return $this->error($result['error'], $result['status']);

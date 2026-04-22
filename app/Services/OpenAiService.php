@@ -83,6 +83,74 @@ Ingredients:
 %s
 PROMPT;
 
+    private string $healthCheckPrompt = <<<PROMPT
+You are a clinical nutrition safety assistant.
+
+A user with the following health conditions is about to 
+consume or create a meal. Analyze whether any ingredients 
+may negatively interact with their conditions.
+
+User health conditions:
+%s
+
+Meal ingredients:
+%s
+
+Rules:
+1. Only flag ingredients that pose a genuine, clinically
+   significant risk for the specific condition listed.
+2. Before flagging, calculate the actual content from the
+   given portion and compare it to these minimum thresholds —
+   only flag if the threshold is exceeded:
+   - Hypertension: sodium > 600mg (salt > 1.5g per serving)
+   - Diabetes: added sugar > 10g per serving
+   - Heart disease: saturated fat > 5g per serving
+   - Kidney disease: potassium > 500mg per serving
+   - Celiac / gluten intolerance: any amount of gluten
+   - Allergies: any amount of the allergen
+3. Be specific — name the exact ingredient, the calculated
+   amount, and why it exceeds the threshold for the condition.
+4. If no threshold is exceeded return is_flagged as false
+   with an empty flagged_ingredients array.
+
+Respond ONLY with valid JSON. No explanation. No markdown.
+No text outside the JSON.
+{
+  "is_flagged": false,
+  "flagged_ingredients": [
+    {
+      "ingredient": "ingredient name",
+      "concern": "specific reason this affects the condition",
+      "condition": "the specific condition it affects",
+      "severity": "high or medium or low"
+    }
+  ]
+}
+PROMPT;
+
+    public function checkHealth(string $conditions, string $mealInfo): ?array
+    {
+        $prompt = sprintf($this->healthCheckPrompt, $conditions, $mealInfo);
+
+        try {
+            $response = OpenAI::chat()->create([
+                'model'                 => env('OPENAI_MODEL_STAGE1'),
+                'temperature'           => 0,
+                'max_completion_tokens' => 800,
+                'messages'              => [['role' => 'user', 'content' => $prompt]],
+            ]);
+
+            $data = json_decode(
+                $this->stripMarkdown($response->choices[0]->message->content),
+                true
+            );
+
+            return is_array($data) ? $data : null;
+        } catch (TransporterException) {
+            return null;
+        }
+    }
+
     public function resolveIngredientNames(array $names): array
     {
         $nameList = implode(', ', $names);
@@ -123,6 +191,7 @@ PROMPT;
         try {
             $response = OpenAI::chat()->create([
                 'model'                 => env('OPENAI_ESTIMATION_MODEL'),
+                'temperature'           => 0,
                 'max_completion_tokens' => 500,
                 'messages'              => [['role' => 'user', 'content' => $prompt]],
             ]);
