@@ -43,6 +43,13 @@ class UserProfileService
         return $user->profile()->first();
     }
 
+    public function updateTargets($user, array $targets): UserProfile
+    {
+        $user->profile()->update($targets);
+
+        return $user->profile()->first();
+    }
+
     //============== Helper Functions =============
 
     private function estimateTargets(UserProfile $profile): array
