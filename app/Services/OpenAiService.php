@@ -83,6 +83,48 @@ Ingredients:
 %s
 PROMPT;
 
+    private string $healthCheckPrompt = <<<PROMPT
+You are a clinical nutrition safety assistant.
+
+A user with the following health conditions is about to 
+consume or create a meal. Analyze whether any ingredients 
+may negatively interact with their conditions.
+
+User health conditions:
+%s
+
+Meal ingredients:
+%s
+
+Rules:
+1. Only flag ingredients with a genuine clinically relevant 
+   concern for the specific condition listed.
+2. Do not over-flag — black pepper for hypertension is not 
+   a concern worth flagging.
+3. Focus on significant interactions — high sugar for diabetes,
+   high sodium for hypertension, gluten for celiac, 
+   lactose for lactose intolerance, high potassium for 
+   kidney disease.
+4. Be specific — name the exact ingredient and why it is 
+   a concern for the exact condition.
+5. If no genuine concern exists return is_flagged as false
+   with an empty flagged_ingredients array.
+
+Respond ONLY with valid JSON. No explanation. No markdown.
+No text outside the JSON.
+{
+  "is_flagged": false,
+  "flagged_ingredients": [
+    {
+      "ingredient": "ingredient name",
+      "concern": "specific reason this affects the condition",
+      "condition": "the specific condition it affects",
+      "severity": "high or medium or low"
+    }
+  ]
+}
+PROMPT;
+
     public function resolveIngredientNames(array $names): array
     {
         $nameList = implode(', ', $names);
