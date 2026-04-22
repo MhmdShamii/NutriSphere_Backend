@@ -125,6 +125,29 @@ No text outside the JSON.
 }
 PROMPT;
 
+    public function checkHealth(string $conditions, string $mealInfo): ?array
+    {
+        $prompt = sprintf($this->healthCheckPrompt, $conditions, $mealInfo);
+
+        try {
+            $response = OpenAI::chat()->create([
+                'model'                 => env('OPENAI_MODEL_STAGE1'),
+                'temperature'           => 0,
+                'max_completion_tokens' => 800,
+                'messages'              => [['role' => 'user', 'content' => $prompt]],
+            ]);
+
+            $data = json_decode(
+                $this->stripMarkdown($response->choices[0]->message->content),
+                true
+            );
+
+            return is_array($data) ? $data : null;
+        } catch (TransporterException) {
+            return null;
+        }
+    }
+
     public function resolveIngredientNames(array $names): array
     {
         $nameList = implode(', ', $names);
