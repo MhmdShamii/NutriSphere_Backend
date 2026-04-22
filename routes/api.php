@@ -45,7 +45,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/log', [DailyLogingController::class, 'logCustomMeal']);
             Route::post('/log/estimate', [DailyLogingController::class, 'logEstimatedMeal']);
             Route::post('/log/{log}/confirm', [DailyLogingController::class, 'confirmLog'])->middleware('ensure.owns:log');
-            Route::post('/log/{meal}', [DailyLogingController::class, 'logMeal']);
+            Route::post('/log/{meal}', [DailyLogingController::class, 'logMeal'])->middleware('meal.loggable');
             Route::delete('/log/{log}', [DailyLogingController::class, 'removeDailyLog'])->middleware('ensure.owns:log');
         });
 
