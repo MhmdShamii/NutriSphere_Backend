@@ -53,6 +53,7 @@ Route::prefix('v1')->group(function () {
             Route::prefix('/analytics')->group(function () {
                 Route::post('/weight', [AnalyticsController::class, 'logWeight']);
                 Route::get('/weight', [AnalyticsController::class, 'weightHistory']);
+                Route::get('/calories', [AnalyticsController::class, 'caloriesWeek']);
             });
         });
 

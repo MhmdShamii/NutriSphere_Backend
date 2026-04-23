@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CaloriesWeekRequest;
 use App\Http\Requests\LogWeightRequest;
+use App\Http\Resources\CaloriesDayResource;
 use App\Http\Resources\WeightLogResource;
 use App\Http\Responses\ApiResponse;
 use App\Services\AnalyticsService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class AnalyticsController extends Controller
@@ -30,7 +31,22 @@ class AnalyticsController extends Controller
         return $this->success(new WeightLogResource($log), 'Weight logged successfully.', status: 201);
     }
 
-    public function weightHistory(Request $request)
+    public function caloriesWeek(CaloriesWeekRequest $request)
+    {
+        $data = $request->validated();
+        $user = Auth::user();
+
+        $days = $this->analyticsService->getCaloriesWeek(
+            userId: $user->id,
+            start: $data['start'],
+            end: $data['end'],
+            profileCreatedAt: $user->created_at,
+        );
+
+        return $this->success(CaloriesDayResource::collection(collect($days)), 'Calories week retrieved.');
+    }
+
+    public function weightHistory(\Illuminate\Http\Request $request)
     {
         $user = Auth::user();
 
