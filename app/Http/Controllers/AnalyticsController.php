@@ -1,0 +1,45 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\LogWeightRequest;
+use App\Http\Resources\WeightLogResource;
+use App\Http\Responses\ApiResponse;
+use App\Services\AnalyticsService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class AnalyticsController extends Controller
+{
+    use ApiResponse;
+
+    public function __construct(private AnalyticsService $analyticsService) {}
+
+    public function logWeight(LogWeightRequest $request)
+    {
+        $data = $request->validated();
+        $user = Auth::user();
+
+        $log = $this->analyticsService->logWeight(
+            userId: $user->id,
+            weightKg: $data['weight_kg'],
+            note: $data['note'] ?? null,
+            date: isset($data['logged_at']) ? new \DateTime($data['logged_at']) : null,
+        );
+
+        return $this->success(new WeightLogResource($log), 'Weight logged successfully.', status: 201);
+    }
+
+    public function weightHistory(Request $request)
+    {
+        $user = Auth::user();
+
+        $logs = $this->analyticsService->getWeightHistory(
+            userId: $user->id,
+            from: $request->query('from'),
+            to: $request->query('to'),
+        );
+
+        return $this->success(WeightLogResource::collection($logs), 'Weight history retrieved.');
+    }
+}
