@@ -34,6 +34,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/complete-main-info', [UserController::class, 'storeMainInfo'])->middleware('ensure.step:main_info');
             Route::post('/complete-basic-info', [UserProfileController::class, 'storeBasicInfo'])->middleware('ensure.step:basic_info');
             Route::post('/complete-targets', [UserProfileController::class, 'storeTargets'])->middleware('ensure.step:targets');
+            Route::patch('/targets', [UserProfileController::class, 'updateTargets']);
             Route::get('/health-conditions', [HealthConditionController::class, 'userConditions'])->middleware('ensure.step:health_conditions');
             Route::post('/health-conditions', [HealthConditionController::class, 'store'])->middleware('ensure.step:health_conditions');
             Route::delete('/health-conditions/{id}', [HealthConditionController::class, 'destroy'])->middleware('ensure.step:health_conditions');
