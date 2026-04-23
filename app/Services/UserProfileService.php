@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class UserProfileService
 {
-    public function __construct(private WeightService $weightService) {}
+    public function __construct(private AnalyticsService $analyticsService) {}
 
     public function completeBasicInfo($user, $profileData)
     {
@@ -22,7 +22,7 @@ class UserProfileService
             $targets = $this->estimateTargets($profile);
             $user->profile()->update($targets);
 
-            $this->weightService->logWeight($user->id, $profileData['weight_kg']);
+            $this->analyticsService->logWeight($user->id, $profileData['weight_kg']);
 
             if ($user->onboarding_step === UserOnboardingSteps::BASIC_INFO) {
                 $user->onboarding_step = UserOnboardingSteps::TARGETS;
