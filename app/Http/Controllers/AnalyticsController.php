@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CaloriesWeekRequest;
 use App\Http\Requests\LogWeightRequest;
 use App\Http\Resources\CaloriesDayResource;
+use App\Http\Resources\MacrosDayResource;
 use App\Http\Resources\WeightLogResource;
 use App\Http\Responses\ApiResponse;
 use App\Services\AnalyticsService;
@@ -44,6 +45,21 @@ class AnalyticsController extends Controller
         );
 
         return $this->success(CaloriesDayResource::collection(collect($days)), 'Calories week retrieved.');
+    }
+
+    public function macrosWeek(CaloriesWeekRequest $request)
+    {
+        $data = $request->validated();
+        $user = Auth::user();
+
+        $days = $this->analyticsService->getMacrosWeek(
+            userId: $user->id,
+            start: $data['start'],
+            end: $data['end'],
+            profileCreatedAt: $user->created_at,
+        );
+
+        return $this->success(MacrosDayResource::collection(collect($days)), 'Macros week retrieved.');
     }
 
     public function weightHistory(\Illuminate\Http\Request $request)

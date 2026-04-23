@@ -47,6 +47,47 @@ class AnalyticsService
         return $days;
     }
 
+    public function getMacrosWeek(int $userId, string $start, string $end, Carbon $profileCreatedAt): array
+    {
+        $summaries = DailySummary::where('user_id', $userId)
+            ->whereBetween('date', [$start, $end])
+            ->get()
+            ->keyBy(fn($s) => $s->date->toDateString());
+
+        $profileStart = $profileCreatedAt->copy()->startOfDay();
+        $days = [];
+        $current = Carbon::parse($start);
+        $last = Carbon::parse($end);
+
+        while ($current->lte($last)) {
+            $key = $current->toDateString();
+
+            if ($current->lt($profileStart)) {
+                $days[] = [
+                    'date'             => $key,
+                    'protein_consumed' => null, 'protein_target' => null,
+                    'carbs_consumed'   => null, 'carbs_target'   => null,
+                    'fats_consumed'    => null, 'fats_target'    => null,
+                ];
+            } else {
+                $s = $summaries->get($key);
+                $days[] = [
+                    'date'             => $key,
+                    'protein_consumed' => $s ? (float) $s->protein_consumed : 0,
+                    'protein_target'   => $s ? (float) $s->protein_target   : null,
+                    'carbs_consumed'   => $s ? (float) $s->carbs_consumed   : 0,
+                    'carbs_target'     => $s ? (float) $s->carbs_target     : null,
+                    'fats_consumed'    => $s ? (float) $s->fats_consumed    : 0,
+                    'fats_target'      => $s ? (float) $s->fats_target      : null,
+                ];
+            }
+
+            $current->addDay();
+        }
+
+        return $days;
+    }
+
     public function getWeightHistory(int $userId, ?string $from = null, ?string $to = null)
     {
         return $this->weightService->getHistory($userId, $from, $to);
