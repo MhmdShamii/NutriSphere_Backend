@@ -99,6 +99,10 @@ class AdminUserSeeder extends Seeder
             );
         }
 
+        // Backdate so analytics history doesn't get blocked by the profile creation check
+        User::where('id', $user->id)->update(['created_at' => Carbon::today()->subDays(40)]);
+        UserProfile::where('user_id', $user->id)->update(['created_at' => Carbon::today()->subDays(40)]);
+
         $this->command->info("Admin user ready: {$email}");
     }
 }
