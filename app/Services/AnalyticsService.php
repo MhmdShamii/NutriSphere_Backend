@@ -81,6 +81,13 @@ class AnalyticsService
             ->first();
     }
 
+    public function getTodayMacros(int $userId, \App\Models\UserProfile $profile): DailySummary|\App\Models\UserProfile
+    {
+        return DailySummary::where('user_id', $userId)
+            ->whereDate('date', Carbon::today())
+            ->first() ?? $profile;
+    }
+
     public function getCurrentStreak(int $userId): int
     {
         $dates = DailySummary::where('user_id', $userId)

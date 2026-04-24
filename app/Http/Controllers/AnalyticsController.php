@@ -7,6 +7,7 @@ use App\Http\Requests\LogWeightRequest;
 use App\Http\Resources\CaloriesDayResource;
 use App\Http\Resources\DaySummaryResource;
 use App\Http\Resources\MacrosDayResource;
+use App\Http\Resources\TodayMacrosResource;
 use App\Http\Resources\WeightLogResource;
 use App\Http\Responses\ApiResponse;
 use App\Services\AnalyticsService;
@@ -62,6 +63,16 @@ class AnalyticsController extends Controller
         );
 
         return $this->success(MacrosDayResource::collection(collect($days)), 'Macros week retrieved.');
+    }
+
+    public function todayMacros()
+    {
+        $user = Auth::user()->load('profile');
+
+        return $this->success(
+            new TodayMacrosResource($this->analyticsService->getTodayMacros($user->id, $user->profile)),
+            "Today's macros retrieved."
+        );
     }
 
     public function todayLogs()

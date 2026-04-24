@@ -53,6 +53,7 @@ Route::prefix('v1')->group(function () {
             Route::prefix('/analytics')->group(function () {
                 Route::get('/streak', [AnalyticsController::class, 'streak']);
                 Route::get('/today', [AnalyticsController::class, 'todayLogs']);
+                Route::get('/today/macros', [AnalyticsController::class, 'todayMacros']);
                 Route::get('/day', [AnalyticsController::class, 'dayLogs']);
                 Route::post('/weight', [AnalyticsController::class, 'logWeight']);
                 Route::get('/weight', [AnalyticsController::class, 'weightHistory']);
