@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\DailySummary;
 use App\Models\UserWeightLog;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 
 class AnalyticsService
 {
@@ -17,75 +18,49 @@ class AnalyticsService
 
     public function getCaloriesWeek(int $userId, string $start, string $end, Carbon $profileCreatedAt): array
     {
-        $summaries = DailySummary::where('user_id', $userId)
-            ->whereBetween('date', [$start, $end])
-            ->get()
-            ->keyBy(fn($s) => $s->date->toDateString());
+        $summaries    = $this->fetchSummariesByRange($userId, $start, $end);
+        $profileStart = $profileCreatedAt->copy()->startOfDay();
 
-        $profileStart = $profileCreatedAt->startOfDay();
-        $days = [];
-        $current = Carbon::parse($start);
-        $last = Carbon::parse($end);
-
-        while ($current->lte($last)) {
-            $key = $current->toDateString();
-
-            if ($current->lt($profileStart)) {
-                $days[] = ['date' => $key, 'calories_consumed' => null, 'calories_target' => null];
-            } else {
-                $summary = $summaries->get($key);
-                $days[] = [
-                    'date'              => $key,
-                    'calories_consumed' => $summary ? (float) $summary->calories_consumed : 0,
-                    'calories_target'   => $summary ? (float) $summary->calories_target : null,
-                ];
+        return $this->iterateDays($start, $end, function (string $key, bool $beforeProfile) use ($summaries) {
+            if ($beforeProfile) {
+                return ['date' => $key, 'calories_consumed' => null, 'calories_target' => null];
             }
 
-            $current->addDay();
-        }
-
-        return $days;
+            $s = $summaries->get($key);
+            return [
+                'date'              => $key,
+                'calories_consumed' => $s ? (float) $s->calories_consumed : 0,
+                'calories_target'   => $s ? (float) $s->calories_target   : null,
+            ];
+        }, $profileStart);
     }
 
     public function getMacrosWeek(int $userId, string $start, string $end, Carbon $profileCreatedAt): array
     {
-        $summaries = DailySummary::where('user_id', $userId)
-            ->whereBetween('date', [$start, $end])
-            ->get()
-            ->keyBy(fn($s) => $s->date->toDateString());
-
+        $summaries    = $this->fetchSummariesByRange($userId, $start, $end);
         $profileStart = $profileCreatedAt->copy()->startOfDay();
-        $days = [];
-        $current = Carbon::parse($start);
-        $last = Carbon::parse($end);
 
-        while ($current->lte($last)) {
-            $key = $current->toDateString();
-
-            if ($current->lt($profileStart)) {
-                $days[] = [
+        return $this->iterateDays($start, $end, function (string $key, bool $beforeProfile) use ($summaries) {
+            if ($beforeProfile) {
+                return [
                     'date'             => $key,
                     'protein_consumed' => null, 'protein_target' => null,
                     'carbs_consumed'   => null, 'carbs_target'   => null,
                     'fats_consumed'    => null, 'fats_target'    => null,
                 ];
-            } else {
-                $s = $summaries->get($key);
-                $days[] = [
-                    'date'             => $key,
-                    'protein_consumed' => $s ? (float) $s->protein_consumed : 0,
-                    'protein_target'   => $s ? (float) $s->protein_target   : null,
-                    'carbs_consumed'   => $s ? (float) $s->carbs_consumed   : 0,
-                    'carbs_target'     => $s ? (float) $s->carbs_target     : null,
-                    'fats_consumed'    => $s ? (float) $s->fats_consumed    : 0,
-                    'fats_target'      => $s ? (float) $s->fats_target      : null,
-                ];
             }
 
-            $current->addDay();
-        }
-
-        return $days;
+            $s = $summaries->get($key);
+            return [
+                'date'             => $key,
+                'protein_consumed' => $s ? (float) $s->protein_consumed : 0,
+                'protein_target'   => $s ? (float) $s->protein_target   : null,
+                'carbs_consumed'   => $s ? (float) $s->carbs_consumed   : 0,
+                'carbs_target'     => $s ? (float) $s->carbs_target     : null,
+                'fats_consumed'    => $s ? (float) $s->fats_consumed    : 0,
+                'fats_target'      => $s ? (float) $s->fats_target      : null,
+            ];
+        }, $profileStart);
     }
 
     public function getWeightHistory(int $userId, ?string $from = null, ?string $to = null)
@@ -95,10 +70,7 @@ class AnalyticsService
 
     public function getTodayLogs(int $userId): ?DailySummary
     {
-        return DailySummary::where('user_id', $userId)
-            ->whereDate('date', Carbon::today())
-            ->with(['logs.mealPost'])
-            ->first();
+        return $this->getDayLogs($userId, Carbon::today()->toDateString());
     }
 
     public function getDayLogs(int $userId, string $date): ?DailySummary
@@ -107,5 +79,28 @@ class AnalyticsService
             ->whereDate('date', $date)
             ->with(['logs.mealPost'])
             ->first();
+    }
+
+    private function fetchSummariesByRange(int $userId, string $start, string $end): Collection
+    {
+        return DailySummary::where('user_id', $userId)
+            ->whereBetween('date', [$start, $end])
+            ->get()
+            ->keyBy(fn($s) => $s->date->toDateString());
+    }
+
+    private function iterateDays(string $start, string $end, callable $build, Carbon $profileStart): array
+    {
+        $days    = [];
+        $current = Carbon::parse($start);
+        $last    = Carbon::parse($end);
+
+        while ($current->lte($last)) {
+            $key        = $current->toDateString();
+            $days[]     = $build($key, $current->lt($profileStart));
+            $current->addDay();
+        }
+
+        return $days;
     }
 }

@@ -5,13 +5,18 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class TodaySummaryResource extends JsonResource
+class DaySummaryResource extends JsonResource
 {
+    public function __construct($resource, private string $date)
+    {
+        parent::__construct($resource);
+    }
+
     public function toArray(Request $request): array
     {
         if ($this->resource === null) {
             return [
-                'date'               => now()->toDateString(),
+                'date'               => $this->date,
                 'calories_consumed'  => 0,
                 'protein_consumed'   => 0,
                 'carbs_consumed'     => 0,
@@ -28,7 +33,7 @@ class TodaySummaryResource extends JsonResource
         }
 
         return [
-            'date'               => $this->date->toDateString(),
+            'date'               => $this->resource->date->toDateString(),
             'calories_consumed'  => (float) $this->calories_consumed,
             'protein_consumed'   => (float) $this->protein_consumed,
             'carbs_consumed'     => (float) $this->carbs_consumed,

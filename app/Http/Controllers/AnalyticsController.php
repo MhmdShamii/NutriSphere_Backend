@@ -5,12 +5,13 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CaloriesWeekRequest;
 use App\Http\Requests\LogWeightRequest;
 use App\Http\Resources\CaloriesDayResource;
+use App\Http\Resources\DaySummaryResource;
 use App\Http\Resources\MacrosDayResource;
-use App\Http\Resources\TodaySummaryResource;
 use App\Http\Resources\WeightLogResource;
 use App\Http\Responses\ApiResponse;
 use App\Services\AnalyticsService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class AnalyticsController extends Controller
@@ -22,13 +23,12 @@ class AnalyticsController extends Controller
     public function logWeight(LogWeightRequest $request)
     {
         $data = $request->validated();
-        $user = Auth::user();
 
         $log = $this->analyticsService->logWeight(
-            userId: $user->id,
+            userId: Auth::id(),
             weightKg: $data['weight_kg'],
             note: $data['note'] ?? null,
-            date: isset($data['logged_at']) ? new \DateTime($data['logged_at']) : null,
+            date: isset($data['logged_at']) ? Carbon::parse($data['logged_at']) : null,
         );
 
         return $this->success(new WeightLogResource($log), 'Weight logged successfully.', status: 201);
@@ -66,18 +66,20 @@ class AnalyticsController extends Controller
 
     public function todayLogs()
     {
+        $date    = Carbon::today()->toDateString();
         $summary = $this->analyticsService->getTodayLogs(Auth::id());
 
-        return $this->success(new TodaySummaryResource($summary), "Today's logs retrieved.");
+        return $this->success(new DaySummaryResource($summary, $date), "Today's logs retrieved.");
     }
 
     public function dayLogs(Request $request)
     {
         $request->validate(['date' => 'required|date_format:Y-m-d']);
 
-        $summary = $this->analyticsService->getDayLogs(Auth::id(), $request->input('date'));
+        $date    = $request->input('date');
+        $summary = $this->analyticsService->getDayLogs(Auth::id(), $date);
 
-        return $this->success(new TodaySummaryResource($summary), 'Day logs retrieved.');
+        return $this->success(new DaySummaryResource($summary, $date), 'Day logs retrieved.');
     }
 
     public function weightHistory(Request $request)
