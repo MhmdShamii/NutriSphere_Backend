@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DailyLogingController;
 use App\Http\Controllers\HealthConditionController;
@@ -48,6 +49,17 @@ Route::prefix('v1')->group(function () {
             Route::post('/log/{log}/confirm', [DailyLogingController::class, 'confirmLog'])->middleware('ensure.owns:log');
             Route::post('/log/{meal}', [DailyLogingController::class, 'logMeal'])->middleware('meal.loggable');
             Route::delete('/log/{log}', [DailyLogingController::class, 'removeDailyLog'])->middleware('ensure.owns:log');
+
+            Route::prefix('/analytics')->group(function () {
+                Route::get('/streak', [AnalyticsController::class, 'streak']);
+                Route::get('/today', [AnalyticsController::class, 'todayLogs']);
+                Route::get('/today/macros', [AnalyticsController::class, 'todayMacros']);
+                Route::get('/day', [AnalyticsController::class, 'dayLogs']);
+                Route::post('/weight', [AnalyticsController::class, 'logWeight']);
+                Route::get('/weight', [AnalyticsController::class, 'weightHistory']);
+                Route::get('/calories', [AnalyticsController::class, 'caloriesWeek']);
+                Route::get('/macros', [AnalyticsController::class, 'macrosWeek']);
+            });
         });
 
         Route::prefix('meals')->group(function () {

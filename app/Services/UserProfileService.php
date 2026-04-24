@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 
 class UserProfileService
 {
+    public function __construct(private AnalyticsService $analyticsService) {}
+
     public function completeBasicInfo($user, $profileData)
     {
         DB::transaction(function () use ($user, $profileData) {
@@ -19,6 +21,8 @@ class UserProfileService
             $profile = $user->profile()->first();
             $targets = $this->estimateTargets($profile);
             $user->profile()->update($targets);
+
+            $this->analyticsService->logWeight($user->id, $profileData['weight_kg']);
 
             if ($user->onboarding_step === UserOnboardingSteps::BASIC_INFO) {
                 $user->onboarding_step = UserOnboardingSteps::TARGETS;

@@ -18,7 +18,8 @@ class DatabaseSeeder extends Seeder
             CountrySeeder::class,
             HealthConditionsSeeder::class,
             IngredientsSeeder::class,
-            AdminUserSeeder::class
+            AdminUserSeeder::class,
+            AdminDailyLogsSeeder::class,
         ]);
     }
 }
