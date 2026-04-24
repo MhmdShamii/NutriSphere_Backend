@@ -82,6 +82,13 @@ class AnalyticsController extends Controller
         return $this->success(new DaySummaryResource($summary, $date), 'Day logs retrieved.');
     }
 
+    public function streak()
+    {
+        $streak = $this->analyticsService->getCurrentStreak(Auth::id());
+
+        return $this->success(['current_streak' => $streak], 'Streak retrieved.');
+    }
+
     public function weightHistory(Request $request)
     {
         $user = Auth::user();

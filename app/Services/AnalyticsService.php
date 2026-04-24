@@ -81,6 +81,36 @@ class AnalyticsService
             ->first();
     }
 
+    public function getCurrentStreak(int $userId): int
+    {
+        $dates = DailySummary::where('user_id', $userId)
+            ->where('logs_count', '>', 0)
+            ->orderBy('date', 'desc')
+            ->pluck('date')
+            ->map(fn($d) => Carbon::parse($d)->toDateString())
+            ->all();
+
+        if (empty($dates)) {
+            return 0;
+        }
+
+        $dateSet = array_flip($dates);
+        $streak  = 0;
+        $check   = Carbon::today();
+
+        // if today has no logs yet, streak can still be alive from yesterday
+        if (!isset($dateSet[$check->toDateString()])) {
+            $check->subDay();
+        }
+
+        while (isset($dateSet[$check->toDateString()])) {
+            $streak++;
+            $check->subDay();
+        }
+
+        return $streak;
+    }
+
     private function fetchSummariesByRange(int $userId, string $start, string $end): Collection
     {
         return DailySummary::where('user_id', $userId)
