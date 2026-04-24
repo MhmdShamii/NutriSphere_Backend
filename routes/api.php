@@ -1,13 +1,13 @@
 <?php
 
-use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\Analytics\AnalyticsController;
 use App\Http\Controllers\Auth\AuthController;
-use App\Http\Controllers\DailyLogingController;
-use App\Http\Controllers\HealthConditionController;
-use App\Http\Controllers\IngredientController;
-use App\Http\Controllers\MealController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\UserProfileController;
+use App\Http\Controllers\Meal\DailyLogingController;
+use App\Http\Controllers\Meal\IngredientController;
+use App\Http\Controllers\Meal\MealController;
+use App\Http\Controllers\User\HealthConditionController;
+use App\Http\Controllers\User\UserController;
+use App\Http\Controllers\User\UserProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
