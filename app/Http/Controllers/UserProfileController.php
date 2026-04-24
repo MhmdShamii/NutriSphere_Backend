@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UpdateTargetsRequest;
 use App\Http\Requests\UserProfileBasicRequest;
 use App\Http\Requests\UserProfileCompleteRequest;
 use App\Http\Resources\UserProfileResource;
@@ -27,5 +28,12 @@ class UserProfileController extends Controller
         $profile = $this->userProfileService->completeTargets($request->user(), $request->validated());
 
         return $this->success(new UserProfileResource($profile), 'Targets set successfully', dataKey: 'profile');
+    }
+
+    public function updateTargets(UpdateTargetsRequest $request): JsonResponse
+    {
+        $profile = $this->userProfileService->updateTargets($request->user(), $request->validated());
+
+        return $this->success(new UserProfileResource($profile), 'Targets updated successfully', dataKey: 'profile');
     }
 }

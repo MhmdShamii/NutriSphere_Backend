@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\UserActivityLevels;
+use App\Enums\UserGender;
 use App\Enums\UserGoal;
 use App\Enums\UserOnboardingSteps;
 use App\Models\UserProfile;
@@ -10,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 
 class UserProfileService
 {
+    public function __construct(private AnalyticsService $analyticsService) {}
+
     public function completeBasicInfo($user, $profileData)
     {
         DB::transaction(function () use ($user, $profileData) {
@@ -18,6 +21,8 @@ class UserProfileService
             $profile = $user->profile()->first();
             $targets = $this->estimateTargets($profile);
             $user->profile()->update($targets);
+
+            $this->analyticsService->logWeight($user->id, $profileData['weight_kg']);
 
             if ($user->onboarding_step === UserOnboardingSteps::BASIC_INFO) {
                 $user->onboarding_step = UserOnboardingSteps::TARGETS;
@@ -38,6 +43,13 @@ class UserProfileService
                 $user->save();
             }
         });
+
+        return $user->profile()->first();
+    }
+
+    public function updateTargets($user, array $targets): UserProfile
+    {
+        $user->profile()->update($targets);
 
         return $user->profile()->first();
     }
@@ -83,7 +95,7 @@ class UserProfileService
         $bmr = (10 * $profile->weight_kg)
             + (6.25 * $profile->height_cm)
             - (5 * $age)
-            + ($profile->gender === 'male' ? 5 : -161);
+            + ($profile->gender === UserGender::MALE ? 5 : -161);
 
         $tdee = $bmr * $this->activityMultiplier($profile->activity_level);
 

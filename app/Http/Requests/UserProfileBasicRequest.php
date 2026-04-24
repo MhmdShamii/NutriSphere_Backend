@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Enums\UserActivityLevels;
 use App\Enums\UserDietaryPreferences;
+use App\Enums\UserGender;
 use App\Enums\UserGoal;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -28,7 +29,7 @@ class UserProfileBasicRequest extends FormRequest
     {
         return [
             'date_of_birth' => ['required', 'date', 'before:today'],
-            'gender' => ['required', 'in:male,female'],
+            'gender' => ['required', new Enum(UserGender::class)],
             'weight_kg' => ['required', 'numeric', 'min:0'],
             'height_cm' => ['required', 'numeric', 'min:0'],
             'body_fat_pct' => ['nullable', 'numeric', 'min:1', 'max:70'],

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\UserActivityLevels;
 use App\Enums\UserDietaryPreferences;
+use App\Enums\UserGender;
 use App\Enums\UserGoal;
 use Illuminate\Database\Eloquent\Model;
 
@@ -31,6 +32,7 @@ class UserProfile extends Model
         'date_of_birth'       => 'date',
         'weight_kg'           => 'decimal:2',
         'height_cm'           => 'decimal:2',
+        'gender'              => UserGender::class,
         'activity_level'      => UserActivityLevels::class,
         'goal'                => UserGoal::class,
         'dietary_preferences' => UserDietaryPreferences::class,
