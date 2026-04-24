@@ -92,4 +92,20 @@ class AnalyticsService
     {
         return $this->weightService->getHistory($userId, $from, $to);
     }
+
+    public function getTodayLogs(int $userId): ?DailySummary
+    {
+        return DailySummary::where('user_id', $userId)
+            ->whereDate('date', Carbon::today())
+            ->with(['logs.mealPost'])
+            ->first();
+    }
+
+    public function getDayLogs(int $userId, string $date): ?DailySummary
+    {
+        return DailySummary::where('user_id', $userId)
+            ->whereDate('date', $date)
+            ->with(['logs.mealPost'])
+            ->first();
+    }
 }

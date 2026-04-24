@@ -6,9 +6,11 @@ use App\Http\Requests\CaloriesWeekRequest;
 use App\Http\Requests\LogWeightRequest;
 use App\Http\Resources\CaloriesDayResource;
 use App\Http\Resources\MacrosDayResource;
+use App\Http\Resources\TodaySummaryResource;
 use App\Http\Resources\WeightLogResource;
 use App\Http\Responses\ApiResponse;
 use App\Services\AnalyticsService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class AnalyticsController extends Controller
@@ -62,7 +64,23 @@ class AnalyticsController extends Controller
         return $this->success(MacrosDayResource::collection(collect($days)), 'Macros week retrieved.');
     }
 
-    public function weightHistory(\Illuminate\Http\Request $request)
+    public function todayLogs()
+    {
+        $summary = $this->analyticsService->getTodayLogs(Auth::id());
+
+        return $this->success(new TodaySummaryResource($summary), "Today's logs retrieved.");
+    }
+
+    public function dayLogs(Request $request)
+    {
+        $request->validate(['date' => 'required|date_format:Y-m-d']);
+
+        $summary = $this->analyticsService->getDayLogs(Auth::id(), $request->input('date'));
+
+        return $this->success(new TodaySummaryResource($summary), 'Day logs retrieved.');
+    }
+
+    public function weightHistory(Request $request)
     {
         $user = Auth::user();
 

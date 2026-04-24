@@ -21,6 +21,10 @@ class DailyLogResource extends JsonResource
             'fiber'        => $this->fiber,
             'logged_at'    => $this->logged_at,
             'confirmed_at' => $this->confirmed_at,
+            'meal_post'    => $this->whenLoaded('mealPost', fn() => [
+                'id'        => $this->mealPost->id,
+                'image_url' => $this->mealPost->image_url,
+            ]),
         ];
     }
 }

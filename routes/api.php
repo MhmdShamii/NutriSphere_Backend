@@ -51,6 +51,8 @@ Route::prefix('v1')->group(function () {
             Route::delete('/log/{log}', [DailyLogingController::class, 'removeDailyLog'])->middleware('ensure.owns:log');
 
             Route::prefix('/analytics')->group(function () {
+                Route::get('/today', [AnalyticsController::class, 'todayLogs']);
+                Route::get('/day', [AnalyticsController::class, 'dayLogs']);
                 Route::post('/weight', [AnalyticsController::class, 'logWeight']);
                 Route::get('/weight', [AnalyticsController::class, 'weightHistory']);
                 Route::get('/calories', [AnalyticsController::class, 'caloriesWeek']);
