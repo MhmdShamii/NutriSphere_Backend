@@ -49,4 +49,9 @@ class MealPost extends Model
     {
         return $this->hasMany(MealPreparationStep::class)->orderBy('step_number');
     }
+
+    public function likes()
+    {
+        return $this->belongsToMany(User::class, 'meal_post_likes', 'meal_post_id', 'user_id');
+    }
 }

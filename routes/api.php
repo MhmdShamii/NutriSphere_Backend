@@ -9,6 +9,7 @@ use App\Http\Controllers\User\HealthConditionController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\Social\FollowController;
+use App\Http\Controllers\Social\LikeController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -67,6 +68,8 @@ Route::prefix('v1')->group(function () {
             Route::post('/', [MealController::class, 'store']);
             Route::post('/{meal}/confirm', [MealController::class, 'confirm'])->middleware('ensure.owns:meal,user_profile_id');
             Route::post('/{meal}/discard', [MealController::class, 'discard'])->middleware('ensure.owns:meal,user_profile_id');
+            Route::post('/{meal}/like', [LikeController::class, 'like']);
+            Route::delete('/{meal}/like', [LikeController::class, 'unlike']);
         });
 
         Route::prefix('users')->group(function () {
