@@ -10,6 +10,7 @@ use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\Social\FollowController;
 use App\Http\Controllers\Social\LikeController;
+use App\Http\Controllers\User\UserMealController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -78,6 +79,8 @@ Route::prefix('v1')->group(function () {
             Route::delete('/{user}/follow', [FollowController::class, 'unfollow']);
             Route::get('/{user}/followers', [FollowController::class, 'followers']);
             Route::get('/{user}/following', [FollowController::class, 'following']);
+            Route::get('/{user}/meals', [UserMealController::class, 'publicMeals']);
+            Route::get('/{user}/meals/private', [UserMealController::class, 'privateMeals']);
         });
 
         Route::prefix('ingredients')->group(function () {
