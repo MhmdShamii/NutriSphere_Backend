@@ -46,7 +46,7 @@ class UserMealController extends Controller
                 'prev_cursor' => $result->previousCursor()?->encode(),
                 'per_page'    => $result->perPage(),
             ],
-            'Private meals retrieved.'
+            'Meals retrieved.'
         );
     }
 }
