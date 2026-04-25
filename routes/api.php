@@ -8,6 +8,7 @@ use App\Http\Controllers\Meal\MealController;
 use App\Http\Controllers\User\HealthConditionController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\User\UserProfileController;
+use App\Http\Controllers\Social\FollowController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -68,6 +69,12 @@ Route::prefix('v1')->group(function () {
             Route::post('/{meal}/discard', [MealController::class, 'discard'])->middleware('ensure.owns:meal,user_profile_id');
         });
 
+        Route::prefix('users')->group(function () {
+            Route::post('/{user}/follow', [FollowController::class, 'follow']);
+            Route::delete('/{user}/follow', [FollowController::class, 'unfollow']);
+            Route::get('/{user}/followers', [FollowController::class, 'followers']);
+            Route::get('/{user}/following', [FollowController::class, 'following']);
+        });
 
         Route::prefix('ingredients')->group(function () {
             Route::post('/search', [IngredientController::class, 'search']);
