@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             IngredientsSeeder::class,
             AdminUserSeeder::class,
             AdminDailyLogsSeeder::class,
+            AdminMealPostsSeeder::class,
         ]);
     }
 }
