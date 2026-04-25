@@ -19,6 +19,7 @@ class DailyLogingService
     {
         return DB::transaction(function () use ($mealPost, $user) {
             $summary = $this->findOrCreateSummary($user, now()->toDateString(), $user->profile);
+            $mealPost->increment('relogs_count');
 
             return $this->createLog($user, $summary, $this->calculateForOnePortion($mealPost), $mealPost->name, null, DailyLogType::MEAL, $mealPost->id);
         });
@@ -32,6 +33,10 @@ class DailyLogingService
                 if ($summary) {
                     $this->modifyDailySummary($summary, $log, isAdding: false);
                 }
+            }
+
+            if ($log->meal_post_id !== null) {
+                MealPost::where('id', $log->meal_post_id)->decrement('relogs_count');
             }
 
             $log->delete();
