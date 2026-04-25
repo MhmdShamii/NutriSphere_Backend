@@ -23,6 +23,15 @@ trait ApiResponse
         ]);
     }
 
+    protected function paginated(mixed $data, array $meta, string $message = 'OK', int $status = 200): JsonResponse
+    {
+        return response()->json([
+            'data'    => $data,
+            'meta'    => $meta,
+            'message' => $message,
+        ], $status);
+    }
+
     protected function error(string $message = 'Error', int $status = 400, mixed $errors = null): JsonResponse
     {
         return response()->json([
