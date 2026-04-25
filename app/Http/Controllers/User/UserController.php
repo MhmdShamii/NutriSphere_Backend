@@ -7,8 +7,10 @@ use App\Http\Requests\User\CompleteMainInfoRequest;
 use App\Http\Requests\User\UpdateAvatarRequest;
 use App\Http\Requests\User\UpdateCoverImageRequest;
 use App\Http\Requests\User\UpdateUserRequest;
+use App\Http\Resources\User\UserPublicProfileResource;
 use App\Http\Resources\User\UserResource;
 use App\Http\Responses\ApiResponse;
+use App\Models\User;
 use App\Services\User\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -22,6 +24,17 @@ class UserController extends Controller
     public function __construct(UserService $userService)
     {
         $this->userService = $userService;
+    }
+
+    public function userProfile(User $user, Request $request): JsonResponse
+    {
+        $profile = $this->userService->getUserPublicProfile($user, $request->user());
+
+        return $this->success(
+            new UserPublicProfileResource($profile),
+            'User profile retrieved successfully',
+            dataKey: 'user'
+        );
     }
 
     public function checkEmail(Request $request): JsonResponse

@@ -18,6 +18,16 @@ class UserService
         return $request->user()->load('profile', 'country');
     }
 
+    public function getUserPublicProfile(User $targetUser, User $authUser): User
+    {
+        $targetUser->loadCount(['followers', 'following'])->load('country');
+
+        $targetUser->is_following = $authUser->following()->where('followed_id', $targetUser->id)->exists();
+        $targetUser->follows_you  = $targetUser->following()->where('followed_id', $authUser->id)->exists();
+
+        return $targetUser;
+    }
+
     public function findUserEmailExist(string $email): bool
     {
         return User::findByEmail($email)->first() ? true : false;

@@ -75,6 +75,7 @@ Route::prefix('v1')->group(function () {
         });
 
         Route::prefix('users')->group(function () {
+            Route::get('/{user}', [UserController::class, 'userProfile']);
             Route::post('/{user}/follow', [FollowController::class, 'follow']);
             Route::delete('/{user}/follow', [FollowController::class, 'unfollow']);
             Route::get('/{user}/followers', [FollowController::class, 'followers']);
