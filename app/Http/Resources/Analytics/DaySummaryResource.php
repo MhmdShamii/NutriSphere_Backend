@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Analytics;
 
+use App\Http\Resources\Meal\DailyLogResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
