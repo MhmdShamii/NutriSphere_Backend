@@ -17,6 +17,8 @@ class FollowService
         }
 
         $follower->following()->attach($target->id);
+        $follower->increment('following_count');
+        $target->increment('followers_count');
     }
 
     public function unfollow(User $follower, User $target): void
@@ -26,6 +28,8 @@ class FollowService
         }
 
         $follower->following()->detach($target->id);
+        $follower->decrement('following_count');
+        $target->decrement('followers_count');
     }
 
     public function getFollowers(User $user, int $perPage = 20)
