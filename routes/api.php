@@ -65,6 +65,7 @@ Route::prefix('v1')->group(function () {
         });
 
         Route::prefix('meals')->group(function () {
+            Route::get('/{meal}', [MealController::class, 'show']);
             Route::post('/', [MealController::class, 'store']);
             Route::post('/{meal}/confirm', [MealController::class, 'confirm'])->middleware('ensure.owns:meal,user_profile_id');
             Route::post('/{meal}/discard', [MealController::class, 'discard'])->middleware('ensure.owns:meal,user_profile_id');

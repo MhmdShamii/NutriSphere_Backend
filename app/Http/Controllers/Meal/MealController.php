@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Meal;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Meal\ConfirmMealRequest;
 use App\Http\Requests\Meal\CreateMealRequest;
+use App\Http\Resources\Meal\MealPostDetailResource;
 use App\Http\Resources\Meal\MealPostResource;
 use App\Http\Resources\Meal\MealPostResponseResource;
 use App\Http\Responses\ApiResponse;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Services\Meal\CreateMealService;
 use App\Services\Meal\HealthWarningService;
 use App\Services\Meal\MealConfirmationService;
+use App\Services\Meal\MealQueryService;
 use Illuminate\Http\JsonResponse;
 
 class MealController extends Controller
@@ -23,7 +25,15 @@ class MealController extends Controller
         private CreateMealService $createMealService,
         private MealConfirmationService $mealConfirmationService,
         private HealthWarningService $healthWarningService,
+        private MealQueryService $mealQueryService,
     ) {}
+
+    public function show(int $id): JsonResponse
+    {
+        $meal = $this->mealQueryService->getById($id, Auth::user());
+
+        return $this->success(new MealPostDetailResource($meal), 'Meal retrieved successfully.', 'meal');
+    }
 
     public function store(CreateMealRequest $request): JsonResponse
     {
