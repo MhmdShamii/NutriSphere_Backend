@@ -8,6 +8,7 @@ use App\Http\Controllers\Meal\MealController;
 use App\Http\Controllers\User\HealthConditionController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\User\UserProfileController;
+use App\Http\Controllers\Social\CommentController;
 use App\Http\Controllers\Social\FollowController;
 use App\Http\Controllers\Social\LikeController;
 use App\Http\Controllers\User\UserMealController;
@@ -72,6 +73,11 @@ Route::prefix('v1')->group(function () {
             Route::post('/{meal}/discard', [MealController::class, 'discard'])->middleware('ensure.owns:meal,user_profile_id');
             Route::post('/{meal}/like', [LikeController::class, 'like']);
             Route::delete('/{meal}/like', [LikeController::class, 'unlike']);
+            Route::get('/{meal}/comments', [CommentController::class, 'index']);
+            Route::post('/{meal}/comments', [CommentController::class, 'store']);
+            Route::get('/{meal}/comments/{comment}/replies', [CommentController::class, 'replies']);
+            Route::post('/{meal}/comments/{comment}/replies', [CommentController::class, 'reply']);
+            Route::delete('/{meal}/comments/{comment}', [CommentController::class, 'destroy']);
         });
 
         Route::prefix('users')->group(function () {

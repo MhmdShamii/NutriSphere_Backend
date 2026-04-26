@@ -6,6 +6,7 @@ use App\Enums\MealVisibility;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class MealPost extends Model
 {
@@ -50,8 +51,13 @@ class MealPost extends Model
         return $this->hasMany(MealPreparationStep::class)->orderBy('step_number');
     }
 
-    public function likes()
+    public function likes(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'meal_post_likes', 'meal_post_id', 'user_id');
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(MealPostComment::class)->whereNull('parent_id')->oldest();
     }
 }
