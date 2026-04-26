@@ -9,6 +9,7 @@ use App\Http\Controllers\User\HealthConditionController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\Social\CommentController;
+use App\Http\Controllers\Social\FeedController;
 use App\Http\Controllers\Social\FollowController;
 use App\Http\Controllers\Social\LikeController;
 use App\Http\Controllers\User\UserMealController;
@@ -65,6 +66,8 @@ Route::prefix('v1')->group(function () {
                 Route::get('/macros', [AnalyticsController::class, 'macrosWeek']);
             });
         });
+
+        Route::get('/feed', [FeedController::class, 'index']);
 
         Route::prefix('meals')->group(function () {
             Route::get('/{meal}', [MealController::class, 'show']);
