@@ -34,6 +34,34 @@ class FeedService
         return $posts;
     }
 
+    public function getFollowingFeed(User $viewer, int $perPage = 12): CursorPaginator
+    {
+        $followedIds = $viewer->following()->pluck('users.id');
+
+        $posts = MealPost::with([
+                'mealMacro',
+                'ingredients',
+                'preparationSteps',
+                'userProfile.user',
+                'likes' => fn($q) => $q->where('user_id', $viewer->id),
+            ])
+            ->whereNotNull('confirmed_at')
+            ->where('visibility', MealVisibility::PUBLIC)
+            ->whereHas('userProfile', fn($q) => $q->whereIn('user_id', $followedIds))
+            ->orderByDesc('confirmed_at')
+            ->cursorPaginate($perPage);
+
+        $items = collect($posts->items());
+
+        $this->attachFirstComment($items);
+
+        foreach ($items as $post) {
+            $post->setAttribute('viewer_follows_author', true);
+        }
+
+        return $posts;
+    }
+
     private function attachFollowStatus(Collection $posts, User $viewer): void
     {
         $authorIds = $posts

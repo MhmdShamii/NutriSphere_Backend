@@ -69,6 +69,7 @@ Route::prefix('v1')->group(function () {
         });
 
         Route::get('/feed', [FeedController::class, 'index']);
+        Route::get('/feed/following', [FeedController::class, 'following']);
 
         Route::prefix('notifications')->group(function () {
             Route::get('/check', [NotificationController::class, 'check']);

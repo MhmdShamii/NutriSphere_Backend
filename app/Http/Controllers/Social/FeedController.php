@@ -27,4 +27,17 @@ class FeedController extends Controller
             'message'     => 'Feed retrieved.',
         ]);
     }
+
+    public function following(): JsonResponse
+    {
+        $posts = $this->feedService->getFollowingFeed(Auth::user());
+
+        return response()->json([
+            'data'        => FeedPostResource::collection($posts->items()),
+            'next_cursor' => $posts->nextCursor()?->encode(),
+            'prev_cursor' => $posts->previousCursor()?->encode(),
+            'per_page'    => $posts->perPage(),
+            'message'     => 'Following feed retrieved.',
+        ]);
+    }
 }
