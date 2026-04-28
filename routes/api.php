@@ -8,6 +8,7 @@ use App\Http\Controllers\Meal\MealController;
 use App\Http\Controllers\User\HealthConditionController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\User\UserProfileController;
+use App\Http\Controllers\Notification\NotificationController;
 use App\Http\Controllers\Social\CommentController;
 use App\Http\Controllers\Social\FeedController;
 use App\Http\Controllers\Social\FollowController;
@@ -68,6 +69,11 @@ Route::prefix('v1')->group(function () {
         });
 
         Route::get('/feed', [FeedController::class, 'index']);
+
+        Route::prefix('notifications')->group(function () {
+            Route::get('/check', [NotificationController::class, 'check']);
+            Route::get('/', [NotificationController::class, 'index']);
+        });
 
         Route::prefix('meals')->group(function () {
             Route::get('/{meal}', [MealController::class, 'show']);
