@@ -3,9 +3,12 @@
 namespace App\Services\Social;
 
 use App\Models\User;
+use App\Services\Notification\NotificationService;
 
 class FollowService
 {
+    public function __construct(private NotificationService $notificationService) {}
+
     public function follow(User $follower, User $target): void
     {
         if ($follower->id === $target->id) {
@@ -19,6 +22,8 @@ class FollowService
         $follower->following()->attach($target->id);
         $follower->increment('following_count');
         $target->increment('followers_count');
+
+        $this->notificationService->notifyFollow($follower, $target);
     }
 
     public function unfollow(User $follower, User $target): void

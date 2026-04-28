@@ -5,11 +5,14 @@ namespace App\Services\Social;
 use App\Models\MealPost;
 use App\Models\MealPostComment;
 use App\Models\User;
+use App\Services\Notification\NotificationService;
 use Illuminate\Pagination\CursorPaginator;
 use Illuminate\Support\Collection;
 
 class CommentService
 {
+    public function __construct(private NotificationService $notificationService) {}
+
     public function list(MealPost $meal, int $perPage = 20): CursorPaginator
     {
         $comments = $meal->comments()
@@ -36,6 +39,8 @@ class CommentService
 
         $meal->increment('comments_count');
 
+        $this->notificationService->notifyComment($user, $meal, $comment);
+
         return $comment->load('user');
     }
 
@@ -57,6 +62,8 @@ class CommentService
         ]);
 
         $meal->increment('comments_count');
+
+        $this->notificationService->notifyReply($user, $meal, $parent, $reply);
 
         return $reply->load('user');
     }
