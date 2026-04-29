@@ -2,15 +2,19 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\UserOnboardingSteps;
+use App\Enums\UserProvider;
+use App\Enums\UserRole;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
@@ -18,9 +22,11 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        'image',
+        'cover_image',
+        'first_name',
+        'last_name',
+        'country_id',
     ];
 
     /**
@@ -30,19 +36,52 @@ class User extends Authenticatable
      */
     protected $hidden = [
         'password',
+        'provider_id',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    protected $casts = [
+        'provider'         => UserProvider::class,
+        'role'             => UserRole::class,
+        'onboarding_step'  => UserOnboardingSteps::class,
+        'email_verified_at' => 'datetime',
+    ];
+
+    // Relations
+    public function country()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->belongsTo(Country::class);
+    }
+
+    public function profile()
+    {
+        return $this->hasOne(UserProfile::class);
+    }
+
+    public function healthConditions()
+    {
+        return $this->hasMany(UserHealthCondition::class);
+    }
+
+    public function dailyLogs()
+    {
+        return $this->hasMany(DailyLog::class);
+    }
+
+    public function following()
+    {
+        return $this->belongsToMany(User::class, 'user_follows', 'follower_id', 'followed_id');
+    }
+
+    public function followers()
+    {
+        return $this->belongsToMany(User::class, 'user_follows', 'followed_id', 'follower_id');
+    }
+
+    // Query scopes
+
+    public function scopeFindByEmail($query, string $email)
+    {
+        return $query->where('email', $email);
     }
 }
