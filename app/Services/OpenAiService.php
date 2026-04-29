@@ -43,11 +43,11 @@ Guidelines:
    than homemade or restaurant.
 4. Base your estimate on a realistic single serving size for 
    this dish in this region.
-5. Account for cooking method impact — fried, grilled, baked, 
+5. Account for cooking method impact — fried, grilled, baked,
    and boiled versions have meaningfully different macro profiles.
-6. If the meal name is a recent or trending dish search for 
+6. If the meal name is a recent or trending dish search for
    its most common preparation and ingredients before estimating.
-Respond ONLY with valid JSON. No explanation. No markdown. 
+Respond ONLY with valid JSON. No explanation. No markdown.
 No text outside the JSON.
 {
   "calories": 0,
@@ -58,7 +58,7 @@ No text outside the JSON.
 }
 All values must be numbers rounded to 2 decimal places.
 All values must be non-negative.
-Calories must be between 50 and 5000 for a single serving.
+Calories must be between 1 and 5000 for a single serving.
 PROMPT;
 
     private string $calculateMacrosPrompt = <<<PROMPT
@@ -133,12 +133,12 @@ PROMPT;
         $prompt = sprintf($this->healthCheckPrompt, $conditions, $mealInfo);
 
         try {
-            $response = OpenAI::chat()->create([
+            $response = $this->withRetry(fn() => OpenAI::chat()->create([
                 'model'                 => env('OPENAI_MODEL_STAGE1'),
                 'temperature'           => 0,
                 'max_completion_tokens' => 800,
                 'messages'              => [['role' => 'user', 'content' => $prompt]],
-            ]);
+            ]));
 
             $data = json_decode(
                 $this->stripMarkdown($response->choices[0]->message->content),
@@ -157,12 +157,12 @@ PROMPT;
         $prompt   = sprintf($this->resolveIngredientPrompt, $nameList);
 
         try {
-            $response = OpenAI::chat()->create([
+            $response = $this->withRetry(fn() => OpenAI::chat()->create([
                 'model'                 => env('OPENAI_MODEL_STAGE1'),
                 'temperature'           => 0,
                 'max_completion_tokens' => 1000,
                 'messages'              => [['role' => 'user', 'content' => $prompt]],
-            ]);
+            ]));
 
             $items = json_decode(
                 $this->stripMarkdown($response->choices[0]->message->content),
@@ -189,11 +189,11 @@ PROMPT;
         );
 
         try {
-            $response = OpenAI::chat()->create([
+            $response = $this->withRetry(fn() => OpenAI::chat()->create([
                 'model'                 => env('OPENAI_ESTIMATION_MODEL'),
                 'max_completion_tokens' => 500,
                 'messages'              => [['role' => 'user', 'content' => $prompt]],
-            ]);
+            ]));
 
             $data = json_decode(
                 $this->stripMarkdown($response->choices[0]->message->content),
@@ -215,12 +215,12 @@ PROMPT;
         $prompt = sprintf($this->calculateMacrosPrompt, $ingredientList);
 
         try {
-            $response = OpenAI::chat()->create([
+            $response = $this->withRetry(fn() => OpenAI::chat()->create([
                 'model'                 => env('OPENAI_MODEL_STAGE2'),
                 'temperature'           => 0,
                 'max_completion_tokens' => 300,
                 'messages'              => [['role' => 'user', 'content' => $prompt]],
-            ]);
+            ]));
 
             $data = json_decode(
                 $this->stripMarkdown($response->choices[0]->message->content),
@@ -234,6 +234,26 @@ PROMPT;
             return $data;
         } catch (TransporterException) {
             throw new Exception('Nutrition service is temporarily unavailable. Please try again later.');
+        }
+    }
+
+    private function withRetry(callable $callback, int $maxAttempts = 3): mixed
+    {
+        $attempt = 0;
+
+        while (true) {
+            try {
+                return $callback();
+            } catch (TransporterException $e) {
+                $attempt++;
+
+                if ($attempt >= $maxAttempts) {
+                    throw $e;
+                }
+
+                // exponential backoff: 500ms, 1000ms
+                usleep(500_000 * (2 ** ($attempt - 1)));
+            }
         }
     }
 
@@ -264,7 +284,7 @@ PROMPT;
             }
         }
 
-        return $data['calories'] >= 50
+        return $data['calories'] >= 1
             && $data['calories'] <= $maxCalories
             && $data['protein']  >= 0
             && $data['carbs']    >= 0

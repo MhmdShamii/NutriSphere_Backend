@@ -68,6 +68,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(DailyLog::class);
     }
 
+    public function following()
+    {
+        return $this->belongsToMany(User::class, 'user_follows', 'follower_id', 'followed_id');
+    }
+
+    public function followers()
+    {
+        return $this->belongsToMany(User::class, 'user_follows', 'followed_id', 'follower_id');
+    }
+
     // Query scopes
 
     public function scopeFindByEmail($query, string $email)

@@ -8,6 +8,12 @@ use App\Http\Controllers\Meal\MealController;
 use App\Http\Controllers\User\HealthConditionController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\User\UserProfileController;
+use App\Http\Controllers\Notification\NotificationController;
+use App\Http\Controllers\Social\CommentController;
+use App\Http\Controllers\Social\FeedController;
+use App\Http\Controllers\Social\FollowController;
+use App\Http\Controllers\Social\LikeController;
+use App\Http\Controllers\User\UserMealController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -62,12 +68,37 @@ Route::prefix('v1')->group(function () {
             });
         });
 
+        Route::get('/feed', [FeedController::class, 'index']);
+        Route::get('/feed/following', [FeedController::class, 'following']);
+
+        Route::prefix('notifications')->group(function () {
+            Route::get('/check', [NotificationController::class, 'check']);
+            Route::get('/', [NotificationController::class, 'index']);
+        });
+
         Route::prefix('meals')->group(function () {
+            Route::get('/{meal}', [MealController::class, 'show']);
             Route::post('/', [MealController::class, 'store']);
             Route::post('/{meal}/confirm', [MealController::class, 'confirm'])->middleware('ensure.owns:meal,user_profile_id');
             Route::post('/{meal}/discard', [MealController::class, 'discard'])->middleware('ensure.owns:meal,user_profile_id');
+            Route::post('/{meal}/like', [LikeController::class, 'like']);
+            Route::delete('/{meal}/like', [LikeController::class, 'unlike']);
+            Route::get('/{meal}/comments', [CommentController::class, 'index']);
+            Route::post('/{meal}/comments', [CommentController::class, 'store']);
+            Route::get('/{meal}/comments/{comment}/replies', [CommentController::class, 'replies']);
+            Route::post('/{meal}/comments/{comment}/replies', [CommentController::class, 'reply']);
+            Route::delete('/{meal}/comments/{comment}', [CommentController::class, 'destroy']);
         });
 
+        Route::prefix('users')->group(function () {
+            Route::get('/{user}', [UserController::class, 'userProfile']);
+            Route::post('/{user}/follow', [FollowController::class, 'follow']);
+            Route::delete('/{user}/follow', [FollowController::class, 'unfollow']);
+            Route::get('/{user}/followers', [FollowController::class, 'followers']);
+            Route::get('/{user}/following', [FollowController::class, 'following']);
+            Route::get('/{user}/meals', [UserMealController::class, 'publicMeals']);
+            Route::get('/{user}/meals/private', [UserMealController::class, 'privateMeals']);
+        });
 
         Route::prefix('ingredients')->group(function () {
             Route::post('/search', [IngredientController::class, 'search']);

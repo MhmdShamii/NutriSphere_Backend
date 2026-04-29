@@ -8,19 +8,28 @@ use App\Models\DailySummary;
 use App\Models\MealMacro;
 use App\Models\MealPost;
 use App\Models\User;
+use App\Services\Notification\NotificationService;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 
 class DailyLogingService
 {
-    public function __construct(private CalculateMacrosService $macrosService) {}
+    public function __construct(
+        private CalculateMacrosService $macrosService,
+        private NotificationService $notificationService,
+    ) {}
 
     public function logMealFromPost(MealPost $mealPost, User $user): DailyLog
     {
         return DB::transaction(function () use ($mealPost, $user) {
             $summary = $this->findOrCreateSummary($user, now()->toDateString(), $user->profile);
+            $mealPost->increment('relogs_count');
 
-            return $this->createLog($user, $summary, $this->calculateForOnePortion($mealPost), $mealPost->name, null, DailyLogType::MEAL, $mealPost->id);
+            $log = $this->createLog($user, $summary, $this->calculateForOnePortion($mealPost), $mealPost->name, null, DailyLogType::MEAL, $mealPost->id);
+
+            $this->notificationService->notifyRelog($user, $mealPost);
+
+            return $log;
         });
     }
 
@@ -32,6 +41,10 @@ class DailyLogingService
                 if ($summary) {
                     $this->modifyDailySummary($summary, $log, isAdding: false);
                 }
+            }
+
+            if ($log->meal_post_id !== null) {
+                MealPost::where('id', $log->meal_post_id)->decrement('relogs_count');
             }
 
             $log->delete();
