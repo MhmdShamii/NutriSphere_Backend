@@ -3,3 +3,6 @@ builder = "railpack"
 
 [build.railpack]
 phpVersion = "8.4"
+
+[deploy]
+startCommand = "php artisan migrate --force && php artisan db:seed --force && php artisan queue:work --tries=3 --timeout=60 & /start-container.sh"
