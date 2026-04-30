@@ -19,8 +19,6 @@ class DatabaseSeeder extends Seeder
             HealthConditionsSeeder::class,
             IngredientsSeeder::class,
             AdminUserSeeder::class,
-            AdminDailyLogsSeeder::class,
-            AdminMealPostsSeeder::class,
         ]);
     }
 }
