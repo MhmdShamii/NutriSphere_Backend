@@ -145,6 +145,10 @@ class CalculateMacrosService
         $resolved         = [];
 
         foreach ($items as $item) {
+            if (!is_array($item) || empty($item['input']) || empty($item['name_en'])) {
+                continue;
+            }
+
             $original = $unresolvedByName[$item['input']] ?? null;
             $nameEn   = ucwords(strtolower($item['name_en']));
             $match    = $this->fuzzyCheckExistingIngredients($nameEn);
