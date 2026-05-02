@@ -14,38 +14,59 @@ class CalculateMacrosService
     private const FUZZY_CANDIDATES = 20;
 
     private const UNIT_MAP = [
-        'grams'       => 'g',
+        // weight
+        'g'           => 'g',
         'gram'        => 'g',
+        'grams'       => 'g',
         'gr'          => 'g',
         'grm'         => 'g',
-        'milliliter'  => 'ml',
-        'millilitre'  => 'ml',
-        'ml'          => 'ml',
-        'tablespoon'  => 'tbsp',
-        'tablespoons' => 'tbsp',
-        'tbs'         => 'tbsp',
-        'teaspoon'    => 'tsp',
-        'teaspoons'   => 'tsp',
+        'kg'          => 'kg',
         'kilogram'    => 'kg',
         'kilograms'   => 'kg',
         'kilo'        => 'kg',
+        'oz'          => 'oz',
+        'ounce'       => 'oz',
+        'ounces'      => 'oz',
+        'lb'          => 'lb',
+        'lbs'         => 'lb',
+        'pound'       => 'lb',
+        'pounds'      => 'lb',
+
+        // volume
+        'ml'          => 'ml',
+        'milliliter'  => 'ml',
+        'millilitre'  => 'ml',
+        'milliliters' => 'ml',
+        'millilitres' => 'ml',
+        'l'           => 'l',
         'liter'       => 'l',
         'litre'       => 'l',
         'liters'      => 'l',
+        'litres'      => 'l',
+        'cup'         => 'cup',
+        'cups'        => 'cup',
+        'tbsp'        => 'tbsp',
+        'tablespoon'  => 'tbsp',
+        'tablespoons' => 'tbsp',
+        'tbs'         => 'tbsp',
+        'tsp'         => 'tsp',
+        'teaspoon'    => 'tsp',
+        'teaspoons'   => 'tsp',
+
+        // count / descriptive
         'piece'       => 'piece',
         'pieces'      => 'piece',
         'pcs'         => 'piece',
         'pc'          => 'piece',
         'pce'         => 'piece',
-        'cup'         => 'cup',
-        'cups'        => 'cup',
-        'ounce'       => 'oz',
-        'ounces'      => 'oz',
-        'oz'          => 'oz',
-        'pound'       => 'lb',
-        'pounds'      => 'lb',
-        'lb'          => 'lb',
-        'lbs'         => 'lb',
+        'serving'     => 'serving',
+        'servings'    => 'serving',
+        'slice'       => 'slice',
+        'slices'      => 'slice',
+        'pinch'       => 'pinch',
+        'pinches'     => 'pinch',
+        'clove'       => 'clove',
+        'cloves'      => 'clove',
     ];
 
     public function __construct(private OpenAiService $openAi) {}
@@ -182,8 +203,8 @@ class CalculateMacrosService
     {
         foreach ($ingredients as &$ingredient) {
             $name = strtolower(trim($ingredient['name']));
-            $name = preg_replace('/\s+/', ' ', $name);
             $name = preg_replace('/[^\p{L}\p{Arabic} ]/u', '', $name);
+            $name = trim(preg_replace('/\s+/', ' ', $name));
             $ingredient['name'] = $name;
         }
         unset($ingredient);

@@ -53,7 +53,7 @@ class FeedPostResource extends JsonResource
                 'likes_count'    => $this->likes_count,
                 'comments_count' => $this->comments_count,
                 'relogs_count'   => $this->relogs_count,
-                'is_liked'       => $this->likes->isNotEmpty(),
+                'is_liked'       => $this->relationLoaded('likes') && $this->likes->isNotEmpty(),
             ],
 
             'first_comment' => $this->when(

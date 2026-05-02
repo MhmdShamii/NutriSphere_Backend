@@ -17,6 +17,7 @@ use App\Http\Controllers\User\UserMealController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
+    Route::get('/feed', [FeedController::class, 'index']);
 
     Route::prefix('auth')->group(function () {
         Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
@@ -68,7 +69,6 @@ Route::prefix('v1')->group(function () {
             });
         });
 
-        Route::get('/feed', [FeedController::class, 'index']);
         Route::get('/feed/following', [FeedController::class, 'following']);
 
         Route::prefix('notifications')->group(function () {

@@ -36,7 +36,8 @@ Format for valid ingredient:
 Format for invalid ingredient:
 { "input": "...", "valid": false, "reason": "..." }
 
-Ingredients: %s
+Ingredients (JSON array of strings): %s
+The "input" field in every response object MUST be the exact string from the array, unchanged.
 PROMPT;
 
     private string $estimateMealPrompt = <<<PROMPT
@@ -68,8 +69,8 @@ Guidelines for valid meals:
 4. Base your estimate on a realistic single serving size for this dish in this region.
 5. Account for cooking method impact — fried, grilled, baked, and boiled versions
    have meaningfully different macro profiles.
-6. If the meal name is a recent or trending dish search for its most common
-   preparation and ingredients before estimating.
+6. If the meal name is a recent or trending dish use your training knowledge
+   of its most common preparation and ingredients to estimate.
 
 Respond ONLY with valid JSON. No explanation. No markdown. No text outside the JSON.
 {
@@ -131,8 +132,10 @@ Meal ingredients:
 Rules:
 1. Only flag ingredients that pose a genuine, clinically
    significant risk for the specific condition listed.
-2. Before flagging, calculate the actual content from the
-   given portion and compare it to these minimum thresholds —
+2. Before flagging, use your nutritional knowledge to estimate
+   the relevant nutrient content (sodium, sugar, saturated fat,
+   potassium, gluten, allergens) for each ingredient at the given
+   portion, then compare against these minimum thresholds —
    only flag if the threshold is exceeded:
    - Hypertension: sodium > 600mg (salt > 1.5g per serving)
    - Diabetes: added sugar > 10g per serving
@@ -185,7 +188,7 @@ PROMPT;
 
     public function resolveIngredientNames(array $names): array
     {
-        $nameList = implode(', ', $names);
+        $nameList = json_encode(array_values($names), JSON_UNESCAPED_UNICODE);
         $prompt   = sprintf($this->resolveIngredientPrompt, $nameList);
 
         try {

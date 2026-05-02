@@ -17,7 +17,7 @@ class FeedController extends Controller
 
     public function index(): JsonResponse
     {
-        $posts = $this->feedService->getFeed(Auth::user());
+        $posts = $this->feedService->getFeed(auth('sanctum')->user());
 
         return response()->json([
             'data'        => FeedPostResource::collection($posts->items()),

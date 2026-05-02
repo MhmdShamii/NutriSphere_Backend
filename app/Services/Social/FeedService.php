@@ -11,21 +11,23 @@ use Illuminate\Support\Collection;
 
 class FeedService
 {
-    public function getFeed(User $viewer, int $perPage = 12): CursorPaginator
+    public function getFeed(?User $viewer, int $perPage = 12): CursorPaginator
     {
-        $posts = MealPost::with([
+        $query = MealPost::with([
                 'mealMacro',
                 'ingredients',
                 'preparationSteps',
                 'userProfile.user',
-                'likes' => fn($q) => $q->where('user_id', $viewer->id),
+                ...($viewer ? ['likes' => fn($q) => $q->where('user_id', $viewer->id)] : []),
             ])
             ->whereNotNull('confirmed_at')
-            ->where('visibility', MealVisibility::PUBLIC)
-            ->whereHas('userProfile', fn($q) => $q->where('user_id', '!=', $viewer->id))
-            ->orderByDesc('confirmed_at')
-            ->cursorPaginate($perPage);
+            ->where('visibility', MealVisibility::PUBLIC);
 
+        if ($viewer) {
+            $query->whereHas('userProfile', fn($q) => $q->where('user_id', '!=', $viewer->id));
+        }
+
+        $posts = $query->orderByDesc('confirmed_at')->cursorPaginate($perPage);
         $items = collect($posts->items());
 
         $this->attachFirstComment($items);
@@ -62,8 +64,15 @@ class FeedService
         return $posts;
     }
 
-    private function attachFollowStatus(Collection $posts, User $viewer): void
+    private function attachFollowStatus(Collection $posts, ?User $viewer): void
     {
+        if (!$viewer) {
+            foreach ($posts as $post) {
+                $post->setAttribute('viewer_follows_author', false);
+            }
+            return;
+        }
+
         $authorIds = $posts
             ->map(fn($p) => $p->userProfile?->user?->id)
             ->filter()

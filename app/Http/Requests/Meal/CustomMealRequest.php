@@ -19,7 +19,7 @@ class CustomMealRequest extends FormRequest
             'ingredients'          => 'required|array|min:1|max:20',
             'ingredients.*.name'   => 'required|string|max:255',
             'ingredients.*.portion' => 'required|numeric|min:0.1|max:10000',
-            'ingredients.*.unit'   => 'required|string',
+            'ingredients.*.unit'   => 'required|string|in:g,kg,oz,lb,ml,l,cup,tbsp,tsp,piece,serving,slice,pinch,clove',
         ];
     }
 }
