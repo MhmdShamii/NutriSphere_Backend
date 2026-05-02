@@ -3,10 +3,10 @@
 namespace App\Services\Meal;
 
 use App\Enums\IngredientSource;
+use App\Exceptions\AiServiceException;
 use App\Services\OpenAiService;
 use App\Models\Ingredient;
 use App\Models\MealMacro;
-use Exception;
 
 class CalculateMacrosService
 {
@@ -55,7 +55,7 @@ class CalculateMacrosService
         $data = $this->openAi->estimateMealMacros($name, $description, $country);
 
         if ($data === null) {
-            throw new Exception('Could not estimate nutrition data. Please try again.');
+            throw new AiServiceException('Could not estimate nutrition data. Please try again.');
         }
 
         return new MealMacro([
@@ -98,7 +98,7 @@ class CalculateMacrosService
         $data = $this->openAi->calculateMacros($ingredientList);
 
         if ($data === null) {
-            throw new Exception('Could not calculate nutrition data. Please try again.');
+            throw new AiServiceException('Could not calculate nutrition data. Please try again.');
         }
 
         return MealMacro::create([

@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\AiServiceException;
 use App\Http\Middleware\EnsureMealIsLoggable;
 use App\Http\Middleware\EnsureOnboardingStep;
 use App\Http\Middleware\EnsureOwnership;
@@ -29,4 +30,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'meal.loggable' => EnsureMealIsLoggable::class,
         ]);
     })
-    ->withExceptions(function (Exceptions $exceptions): void {})->create();
+    ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->render(function (AiServiceException $e) {
+            return response()->json([
+                'data'    => null,
+                'message' => $e->getMessage(),
+                'errors'  => null,
+            ], 503);
+        });
+    })->create();

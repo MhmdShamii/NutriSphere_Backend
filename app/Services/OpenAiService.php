@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use Exception;
+use App\Exceptions\AiServiceException;
 use OpenAI\Exceptions\TransporterException;
 use OpenAI\Laravel\Facades\OpenAI;
 
@@ -170,12 +170,12 @@ PROMPT;
             );
 
             if (!is_array($items)) {
-                throw new Exception('Could not resolve one or more ingredients. Please check your input.');
+                throw new AiServiceException('Could not resolve one or more ingredients. Please check your input.');
             }
 
             return $items;
         } catch (TransporterException) {
-            throw new Exception('Nutrition service is temporarily unavailable. Please try again later.');
+            throw new AiServiceException('Nutrition service is temporarily unavailable. Please try again later.');
         }
     }
 
@@ -201,12 +201,12 @@ PROMPT;
             );
 
             if (!$this->isMacroValid($data, 5000)) {
-                throw new Exception('Could not estimate macros for this meal. Please try again.');
+                throw new AiServiceException('Could not estimate macros for this meal. Please try again.');
             }
 
             return $data;
         } catch (TransporterException) {
-            throw new Exception('Nutrition service is temporarily unavailable. Please try again later.');
+            throw new AiServiceException('Nutrition service is temporarily unavailable. Please try again later.');
         }
     }
 
@@ -228,12 +228,12 @@ PROMPT;
             );
 
             if (!$this->isMacroValid($data, 15000)) {
-                throw new Exception('Could not calculate nutrition data. Please try again.');
+                throw new AiServiceException('Could not calculate nutrition data. Please try again.');
             }
 
             return $data;
         } catch (TransporterException) {
-            throw new Exception('Nutrition service is temporarily unavailable. Please try again later.');
+            throw new AiServiceException('Nutrition service is temporarily unavailable. Please try again later.');
         }
     }
 
