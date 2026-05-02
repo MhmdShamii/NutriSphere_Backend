@@ -15,8 +15,8 @@ class MealConfirmationService
             return ['error' => 'Meal is already confirmed', 'status' => 409];
         }
 
-        $path = $image->store('meals', 'public');
-        $url  = Storage::disk('public')->url($path);
+        $path = $image->store('meals', 's3');
+        $url  = Storage::disk('s3')->url($path);
 
         $meal->update([
             'image_url'    => $url,

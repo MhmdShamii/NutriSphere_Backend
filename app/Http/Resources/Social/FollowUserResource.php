@@ -23,13 +23,13 @@ class FollowUserResource extends JsonResource
     private function resolveAvatarUrl(): string
     {
         if ($this->image === null || $this->image === 'default.png') {
-            return asset('storage/avatars/default.png');
+            return Storage::disk('s3')->url('avatars/default.png');
         }
 
         if (str_starts_with($this->image, 'http')) {
             return $this->image;
         }
 
-        return Storage::disk('public')->url($this->image);
+        return Storage::disk('s3')->url($this->image);
     }
 }

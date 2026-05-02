@@ -36,10 +36,6 @@ class UserService
     public function updateUserAvatar(User $user, UploadedFile $file): User
     {
 
-        if (!Storage::disk('public')->exists('avatars')) {
-            Storage::disk('public')->makeDirectory('avatars');
-        }
-
         return $this->updateUserImage($user, $file);
     }
 
@@ -55,16 +51,12 @@ class UserService
 
     public function updateUserCoverImage(User $user, UploadedFile $file): User
     {
-        if (!Storage::disk('public')->exists('covers')) {
-            Storage::disk('public')->makeDirectory('covers');
-        }
-
         $oldPath = $user->cover_image;
 
         $newPath = $file->storeAs(
             'covers',
             $this->generateImageName('Cover', $file),
-            'public'
+            's3'
         );
 
         try {
@@ -127,7 +119,7 @@ class UserService
         $newPath = $file->storeAs(
             'avatars',
             $this->generateImageName('Avatar', $file),
-            'public'
+            's3'
         );
 
         try {
@@ -156,14 +148,14 @@ class UserService
     private function deleteUserImageFile(?string $imagePath): void
     {
         if ($imagePath && $imagePath !== 'default.png') {
-            Storage::disk('public')->delete($imagePath);
+            Storage::disk('s3')->delete($imagePath);
         }
     }
 
     private function deleteUserCoverImageFile(?string $imagePath): void
     {
         if ($imagePath && $imagePath !== 'default_cover.png') {
-            Storage::disk('public')->delete($imagePath);
+            Storage::disk('s3')->delete($imagePath);
         }
     }
 }

@@ -32,22 +32,22 @@ class UserPublicProfileResource extends JsonResource
     private function resolveAvatarUrl(): string
     {
         if ($this->image === null || $this->image === 'default.png') {
-            return asset('storage/avatars/default.png');
+            return Storage::disk('s3')->url('avatars/default.png');
         }
 
         if (str_starts_with($this->image, 'http')) {
             return $this->image;
         }
 
-        return Storage::disk('public')->url($this->image);
+        return Storage::disk('s3')->url($this->image);
     }
 
     private function resolveCoverImageUrl(): string
     {
         if ($this->cover_image === null || $this->cover_image === 'default_cover.png') {
-            return asset('storage/covers/default_cover.png');
+            return Storage::disk('s3')->url('covers/default_cover.png');
         }
 
-        return Storage::disk('public')->url($this->cover_image);
+        return Storage::disk('s3')->url($this->cover_image);
     }
 }

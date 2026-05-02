@@ -64,13 +64,13 @@ class MealPostDetailResource extends JsonResource
     private function resolveAvatarUrl(?string $image): string
     {
         if (!$image || $image === 'default.png') {
-            return asset('storage/avatars/default.png');
+            return Storage::disk('s3')->url('avatars/default.png');
         }
 
         if (str_starts_with($image, 'http')) {
             return $image;
         }
 
-        return Storage::disk('public')->url($image);
+        return Storage::disk('s3')->url($image);
     }
 }
