@@ -47,6 +47,12 @@ Route::prefix('v1')->group(function () {
             Route::post('/health-conditions', [HealthConditionController::class, 'store'])->middleware('ensure.step:health_conditions');
             Route::delete('/health-conditions/{id}', [HealthConditionController::class, 'destroy'])->middleware('ensure.step:health_conditions');
             Route::post('/complete-health-conditions', [HealthConditionController::class, 'complete'])->middleware('ensure.step:health_conditions');
+            
+            Route::prefix('settings')->group(function () {
+                Route::get('/health-conditions', [HealthConditionController::class, 'userConditions']);
+                Route::delete('/health-conditions/{id}', [HealthConditionController::class, 'destroy']);
+            });
+
             Route::post('/avatar', [UserController::class, 'storeAvatar']);
             Route::delete('/avatar', [UserController::class, 'destroyAvatar']);
             Route::post('/cover-image', [UserController::class, 'storeCoverImage']);
