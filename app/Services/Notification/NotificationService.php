@@ -96,6 +96,18 @@ class NotificationService
         ]);
     }
 
+    public function notifyCoachApplication(User $applicant, int $adminId): void
+    {
+        Notification::create([
+            'user_id'  => $adminId,
+            'actor_id' => $applicant->id,
+            'type'     => NotificationType::COACH_APPLICATION,
+            'data'     => [
+                'applicant_name' => $applicant->first_name . ' ' . $applicant->last_name,
+            ],
+        ]);
+    }
+
     public function notifyFollow(User $actor, User $target): void
     {
         if ($actor->id === $target->id) {

@@ -13,6 +13,7 @@ use App\Http\Controllers\Social\CommentController;
 use App\Http\Controllers\Social\FeedController;
 use App\Http\Controllers\Social\FollowController;
 use App\Http\Controllers\Social\LikeController;
+use App\Http\Controllers\Coach\CoachApplicationController;
 use App\Http\Controllers\User\UserMealController;
 use Illuminate\Support\Facades\Route;
 
@@ -108,6 +109,11 @@ Route::prefix('v1')->group(function () {
 
         Route::prefix('ingredients')->group(function () {
             Route::post('/search', [IngredientController::class, 'search']);
+        });
+
+        Route::prefix('coach-application')->group(function () {
+            Route::get('/', [CoachApplicationController::class, 'show']);
+            Route::post('/', [CoachApplicationController::class, 'store']);
         });
     });
 });
