@@ -6,15 +6,19 @@ use App\Enums\CoachApplicationStatus;
 use App\Enums\UserRole;
 use App\Models\CoachApplication;
 use App\Models\User;
+use App\Services\Notification\NotificationService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 
 class CoachApplicationService
 {
+    public function __construct(private NotificationService $notificationService) {}
+
     public function getApplication(User $user): ?CoachApplication
     {
-        return $user->coachApplication()->with('documents')->first();
+        return $user->coachApplication()->with('documents')->latest()->first();
     }
+
 
     public function submit(User $user, string $description, array $files): CoachApplication
     {
@@ -31,7 +35,7 @@ class CoachApplicationService
             abort(422, 'You already have an active application.');
         }
 
-        return DB::transaction(function () use ($user, $description, $files) {
+        $application = DB::transaction(function () use ($user, $description, $files) {
             $application = $user->coachApplication()->create([
                 'description' => $description,
                 'status'      => CoachApplicationStatus::PENDING,
@@ -54,6 +58,12 @@ class CoachApplicationService
 
             return $application->load('documents');
         });
+
+        User::where('role', UserRole::ADMIN)->pluck('id')->each(
+            fn($adminId) => $this->notificationService->notifyCoachApplication($user, $adminId)
+        );
+
+        return $application;
     }
 
     private function buildFileName(UploadedFile $file): string
