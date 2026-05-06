@@ -111,6 +111,12 @@ Route::prefix('v1')->group(function () {
             Route::post('/search', [IngredientController::class, 'search']);
         });
 
+        Route::prefix('admin')->middleware('admin')->group(function () {
+            Route::get('/ingredients', [IngredientController::class, 'unverified']);
+            Route::post('/ingredients/{ingredient}/approve', [IngredientController::class, 'approve']);
+            Route::delete('/ingredients/{ingredient}', [IngredientController::class, 'destroy']);
+        });
+
         Route::prefix('coach-application')->group(function () {
             Route::get('/', [CoachApplicationController::class, 'show']);
             Route::post('/', [CoachApplicationController::class, 'store']);
