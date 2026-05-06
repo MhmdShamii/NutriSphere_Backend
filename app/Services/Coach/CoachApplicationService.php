@@ -36,6 +36,18 @@ class CoachApplicationService
             abort(422, 'You already have an active application.');
         }
 
+        $lastRejected = $user->coachApplication()
+            ->where('status', CoachApplicationStatus::REJECTED->value)
+            ->latest('reviewed_at')
+            ->first();
+
+        if ($lastRejected) {
+            $canReapplyAt = $lastRejected->reviewed_at->addDays(30);
+            if (now()->lt($canReapplyAt)) {
+                abort(422, 'You can reapply on ' . $canReapplyAt->toDateString() . '.');
+            }
+        }
+
         $application = DB::transaction(function () use ($user, $description, $files) {
             $application = $user->coachApplication()->create([
                 'description' => $description,
@@ -88,7 +100,9 @@ class CoachApplicationService
                 'reviewed_at' => now(),
             ]);
 
-            $application->user->update(['role' => UserRole::COACH]);
+            $user = $application->user;
+            $user->role = UserRole::COACH;
+            $user->save();
         });
 
         return $application->load(['user', 'documents']);
