@@ -105,6 +105,8 @@ class CoachApplicationService
             $user->save();
         });
 
+        $this->notificationService->notifyApplicationApproved($admin, $application->user);
+
         return $application->load(['user', 'documents']);
     }
 
@@ -120,6 +122,8 @@ class CoachApplicationService
             'reviewed_by'      => $admin->id,
             'reviewed_at'      => now(),
         ]);
+
+        $this->notificationService->notifyApplicationRejected($admin, $application->user, $reason);
 
         return $application->load(['user', 'documents']);
     }
