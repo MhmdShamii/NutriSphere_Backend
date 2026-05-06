@@ -115,6 +115,10 @@ Route::prefix('v1')->group(function () {
             Route::get('/ingredients', [IngredientController::class, 'unverified']);
             Route::post('/ingredients/{ingredient}/approve', [IngredientController::class, 'approve']);
             Route::delete('/ingredients/{ingredient}', [IngredientController::class, 'destroy']);
+
+            Route::get('/coach-applications', [CoachApplicationController::class, 'index']);
+            Route::post('/coach-applications/{coachApplication}/approve', [CoachApplicationController::class, 'approve']);
+            Route::post('/coach-applications/{coachApplication}/reject', [CoachApplicationController::class, 'reject']);
         });
 
         Route::prefix('coach-application')->group(function () {

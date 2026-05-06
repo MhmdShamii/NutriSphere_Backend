@@ -16,6 +16,12 @@ class CoachApplicationResource extends JsonResource
             'rejection_reason' => $this->rejection_reason,
             'reviewed_at'      => $this->reviewed_at,
             'documents'        => CoachApplicationDocumentResource::collection($this->whenLoaded('documents')),
+            'applicant'        => $this->whenLoaded('user', fn() => [
+                'id'         => $this->user->id,
+                'first_name' => $this->user->first_name,
+                'last_name'  => $this->user->last_name,
+                'email'      => $this->user->email,
+            ]),
             'submitted_at'     => $this->created_at,
         ];
     }
