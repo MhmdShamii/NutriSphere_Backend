@@ -26,6 +26,24 @@ class UserController extends Controller
         $this->userService = $userService;
     }
 
+    public function index(Request $request): JsonResponse
+    {
+        $paginator = $this->userService->getUsers(
+            $request->query('search'),
+            $request->query('role'),
+            $request->query('onboarding_step'),
+        );
+
+        return $this->paginated(
+            UserResource::collection($paginator->items()),
+            [
+                'next_cursor' => $paginator->nextCursor()?->encode(),
+                'has_more'    => $paginator->hasMorePages(),
+            ],
+            'Users fetched successfully.'
+        );
+    }
+
     public function userProfile(User $user, Request $request): JsonResponse
     {
         $profile = $this->userService->getUserPublicProfile($user, $request->user());

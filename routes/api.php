@@ -112,6 +112,8 @@ Route::prefix('v1')->group(function () {
         });
 
         Route::prefix('admin')->middleware('admin')->group(function () {
+            Route::get('/users', [UserController::class, 'index']);
+
             Route::get('/ingredients', [IngredientController::class, 'unverified']);
             Route::post('/ingredients/{ingredient}/approve', [IngredientController::class, 'approve']);
             Route::delete('/ingredients/{ingredient}', [IngredientController::class, 'destroy']);
